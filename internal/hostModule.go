@@ -39,6 +39,7 @@ func (m *HostModule) LoadConfiguration() {
 	}
 
 	m.appService.InitHost()
+	m.appService.InitApp()
 	m.appService.InitServiceProvider()
 }
 
@@ -62,8 +63,6 @@ func (m *HostModule) Configure() {
 }
 
 func (m *HostModule) InitComplete() {
-	m.appService.InitApp()
-
 	// trigger InitComplete()
 	m.hostService.InitComplete(m.getHost(), m.appService.AppContext())
 }
