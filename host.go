@@ -1,15 +1,14 @@
 package host
 
-import "github.com/Bofry/host/internal"
+import (
+	_ "unsafe"
+)
 
-func Startup(app interface{}) *Starter {
-	return internal.NewStarter(app)
-}
+//go:linkname Startup github.com/Bofry/host/internal.NewStarter
+func Startup(app interface{}) *Starter
 
-func RegisterHostService(starter *Starter, service HostService) {
-	internal.RegisterHostService(starter, service)
-}
+//go:linkname RegisterHostService github.com/Bofry/host/internal.RegisterHostService
+func RegisterHostService(starter *Starter, service HostService)
 
-func StdHostServiceInstance() HostService {
-	return internal.StdHostServiceInstance()
-}
+//go:linkname StdHostServiceInstance github.com/Bofry/host/internal.StdHostServiceInstance
+func StdHostServiceInstance() HostService
