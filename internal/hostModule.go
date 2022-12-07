@@ -43,7 +43,7 @@ func (m *HostModule) LoadConfiguration() {
 	m.appService.InitServiceProvider()
 }
 
-func (m *HostModule) LoadCompoent() {
+func (m *HostModule) LoadComponent() {
 	m.appService.RegisterComponents(m.componentService)
 }
 

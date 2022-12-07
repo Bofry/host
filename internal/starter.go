@@ -86,7 +86,7 @@ func (s *Starter) build() {
 		{
 			module.Init(s)
 			module.LoadConfiguration()
-			module.LoadCompoent()
+			module.LoadComponent()
 			module.LoadMiddleware()
 			module.Configure()
 			module.InitComplete()
