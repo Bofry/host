@@ -3,8 +3,10 @@ package internal
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 )
 
 var _ InjectionService = new(Starter)
@@ -100,6 +102,15 @@ func (s *Starter) build() {
 		s.app = fx.New(
 			fx.Provide(s.constructors...),
 			fx.Invoke(s.functions...),
+			fx.WithLogger(
+				func() fxevent.Logger {
+					return &DefaultLogger{
+						Logger: &fxevent.ConsoleLogger{
+							W: os.Stderr,
+						},
+					}
+				},
+			),
 		)
 	}
 }
