@@ -21,7 +21,8 @@ type (
 
 // func
 type (
-	ConfigureAction              = internal.ConfigureAction
+	OnInitAction                 = internal.OnInitAction
+	OnInitCompleteAction         = internal.OnInitCompleteAction
 	ConfigureConfigurationAction = internal.ConfigureConfigurationAction
 )
 

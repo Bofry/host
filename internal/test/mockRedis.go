@@ -1,6 +1,6 @@
 package test
 
-type mockRedis struct {
+type MockRedis struct {
 	Host     string
 	Password string
 	DB       int

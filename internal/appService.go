@@ -2,16 +2,19 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
 type AppService struct {
-	ctx *AppContext
+	ctx    *AppContext
+	logger *log.Logger
 }
 
-func NewAppService(appCtx *AppContext) *AppService {
+func NewAppService(appCtx *AppContext, logger *log.Logger) *AppService {
 	return &AppService{
-		ctx: appCtx,
+		ctx:    appCtx,
+		logger: logger,
 	}
 }
 
@@ -48,9 +51,8 @@ func (s *AppService) RegisterComponents(service *ComponentService) {
 				v := rvField.Interface()
 				switch v.(type) {
 				case Runable:
-					service.RegisterComponent(v.(Runable).Runner())
-				case Runner:
-					service.RegisterComponent(v.(Runner))
+					service.RegisterComponent(v.(Runable))
+					s.logger.Printf("LOAD Component %T", v)
 				}
 			}
 		}
@@ -63,6 +65,7 @@ func (s *AppService) InitApp() {
 		rvConfig = ctx.Field(APP_CONFIG_FIELD)
 		rvApp    = ctx.pv
 	)
+	s.logger.Printf("LOAD App %s", rvApp.Type())
 
 	// get the instance Init() method
 	fn := rvApp.MethodByName(APP_COMPONENT_INIT_METHOD)
@@ -89,6 +92,7 @@ func (s *AppService) InitConfig() {
 	var (
 		rvConfig = ctx.Field(APP_CONFIG_FIELD)
 	)
+	s.logger.Printf("LOAD Configuration %s", rvConfig.Type())
 
 	// get the instance Init() method
 	fn := rvConfig.MethodByName(APP_COMPONENT_INIT_METHOD)
@@ -114,6 +118,7 @@ func (s *AppService) InitHost() {
 		rvConfig = ctx.Field(APP_CONFIG_FIELD)
 		rvHost   = ctx.Field(APP_HOST_FIELD)
 	)
+	s.logger.Printf("LOAD Host %s", rvHost.Type())
 
 	// get the instance Init() method
 	fn := rvHost.MethodByName(APP_COMPONENT_INIT_METHOD)
@@ -143,6 +148,7 @@ func (s *AppService) InitServiceProvider() {
 		rvConfig          = ctx.Field(APP_CONFIG_FIELD)
 		rvServiceProvider = ctx.Field(APP_SERVICE_PROVIDER_FIELD)
 	)
+	s.logger.Printf("LOAD ServiceProvider %s", rvServiceProvider.Type())
 
 	// get the instance Init() method
 	fn := rvServiceProvider.MethodByName(APP_COMPONENT_INIT_METHOD)

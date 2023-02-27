@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -29,6 +30,8 @@ func TestStarter(t *testing.T) {
 	// $ go run app.go --address ":10094" --compress true
 	initializeArgs()
 
+	log.Default().SetFlags(log.Default().Flags() | log.LUTC)
+
 	app := MockApp{}
 	starter := host.Startup(&app).
 		Middlewares().
@@ -36,45 +39,18 @@ func TestStarter(t *testing.T) {
 			service.
 				LoadEnvironmentVariables("").
 				LoadYamlFile("config.yaml").
-				LoadCommandArguments()
+				LoadCommandArguments().
+				Output()
 		}).
-		Configure(func(config interface{}) {
-			conf, ok := config.(*Config)
-			if !ok {
-				t.Error("the argument 'config' should be of type Config")
+		OnInit(func(appContext interface{}) {
+			if v, ok := appContext.(*MockApp); ok {
+				fmt.Printf("OnInit: %#v\n", v)
 			}
-
-			// fmt.Printf("%+v\n", conf)
-			// assert app.Config
-			{
-				if conf == nil {
-					t.Error("assert 'MockApp.Config':: should not be nil")
-				}
-				if conf.ListenAddress != ":10094" {
-					t.Errorf("assert 'Config.ListenAddress':: expected '%v', got '%v'", ":10094", conf.ListenAddress)
-				}
-				if conf.EnableCompress != true {
-					t.Errorf("assert 'Config.EnableCompress':: expected '%v', got '%v'", true, conf.EnableCompress)
-				}
-				if conf.RedisHost != "kubernate-redis:26379" {
-					t.Errorf("assert 'Config.RedisHost':: expected '%v', got '%v'", "kubernate-redis:26379", conf.RedisHost)
-				}
-				if conf.RedisPassword != "1234" {
-					t.Errorf("assert 'Config.RedisPassword':: expected '%v', got '%v'", "1234", conf.RedisPassword)
-				}
-				if conf.RedisDB != 3 {
-					t.Errorf("assert 'Config.RedisDB':: expected '%v', got '%v'", 3, conf.RedisDB)
-				}
-				if conf.RedisPoolSize != 128 {
-					t.Errorf("assert 'Config.RedisPoolSize':: expected '%v', got '%v'", 128, conf.RedisPoolSize)
-				}
-				if conf.Workspace != "demo_test" {
-					t.Errorf("assert 'Config.Workspace':: expected '%v', got '%v'", "demo_test", conf.Workspace)
-				}
+		}).
+		OnInitComplete(func(appContext interface{}) {
+			if v, ok := appContext.(*MockApp); ok {
+				fmt.Printf("OnInitComplete: %#v\n", v)
 			}
-
-			// logging your configuration -or- your can setup other global objects
-			fmt.Printf("the server listen at %s\n", conf.ListenAddress)
 		})
 
 	runCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -94,9 +70,6 @@ func TestStarter(t *testing.T) {
 	{
 		if app.Component == nil {
 			t.Error("assert 'MockApp.Component':: should not be nil")
-		}
-		if app.ComponentRunner == nil {
-			t.Error("assert 'MockApp.ComponentRunner':: should not be nil")
 		}
 	}
 

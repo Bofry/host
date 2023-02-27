@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Bofry/config"
 )
@@ -15,9 +16,9 @@ type HostModule struct {
 
 	middlewares                  []Middleware
 	configureConfigurationAction ConfigureConfigurationAction
-	configureAction              ConfigureAction
 
-	// transient
+	logger *log.Logger
+
 	host Host
 }
 
@@ -50,15 +51,8 @@ func (m *HostModule) LoadComponent() {
 func (m *HostModule) LoadMiddleware() {
 	appCtx := m.appService.AppContext()
 	for _, v := range m.middlewares {
+		m.logger.Printf("load middleware %T", v)
 		v.Init(appCtx)
-	}
-}
-
-func (m *HostModule) Configure() {
-	if m.configureAction != nil {
-		rv := m.appService.AppContext().Field(APP_CONFIG_FIELD)
-		config := rv.Interface()
-		m.configureAction(config)
 	}
 }
 
@@ -79,9 +73,22 @@ func (m *HostModule) Stop(ctx context.Context) error {
 	var (
 		host = m.getHost()
 	)
-	// FIXME see if all components are graceful shutdown or don't
 	m.componentService.Stop()
 	return host.Stop(ctx)
+}
+
+func (m *HostModule) triggerOnInitEvent(action OnInitAction) {
+	if action != nil {
+		v := m.appService.AppContext().target
+		action(v)
+	}
+}
+
+func (m *HostModule) triggerOnInitCompleteEvent(action OnInitCompleteAction) {
+	if action != nil {
+		v := m.appService.AppContext().target
+		action(v)
+	}
 }
 
 func (m *HostModule) getHost() Host {

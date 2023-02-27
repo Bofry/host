@@ -2,8 +2,6 @@ package internal
 
 import (
 	"context"
-	"log"
-	"os"
 	"reflect"
 
 	"github.com/Bofry/config"
@@ -21,8 +19,6 @@ const (
 var (
 	typeOfHost     = reflect.TypeOf((*Host)(nil)).Elem()
 	stdHostService = &StdHostService{}
-
-	logger *log.Logger = log.New(os.Stdout, LOGGER_PREFIX, log.LstdFlags|log.Lmsgprefix)
 )
 
 type (
@@ -56,6 +52,7 @@ type (
 		Runner() Runner
 	}
 
-	ConfigureAction              func(config interface{})
+	OnInitAction                 func(appContext interface{})
+	OnInitCompleteAction         func(appContext interface{})
 	ConfigureConfigurationAction func(service *config.ConfigurationService)
 )

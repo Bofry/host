@@ -4,6 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+)
+
+var (
+	logger *log.Logger = log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
 )
 
 type (
@@ -12,8 +17,7 @@ type (
 		Config          *Config
 		ServiceProvider *ServiceProvider
 
-		Component       *MockComponent
-		ComponentRunner *MockComponentRunner
+		Component *MockComponent
 	}
 
 	Host struct {
@@ -35,7 +39,7 @@ type (
 	}
 
 	ServiceProvider struct {
-		RedisClient *mockRedis
+		RedisClient *MockRedis
 	}
 )
 
@@ -43,11 +47,10 @@ func (app *MockApp) Init(conf *Config) {
 	fmt.Println("MockApp.Init()")
 
 	app.Component = &MockComponent{}
-	app.ComponentRunner = &MockComponentRunner{prefix: "MockComponentRunner"}
 }
 
 func (provider *ServiceProvider) Init(conf *Config, app *MockApp) {
-	provider.RedisClient = &mockRedis{
+	provider.RedisClient = &MockRedis{
 		Host:     conf.RedisHost,
 		Password: conf.RedisPassword,
 		DB:       conf.RedisDB,
@@ -61,10 +64,10 @@ func (host *Host) Init(conf *Config) {
 }
 
 func (host *Host) Start(ctx context.Context) {
-	log.Println("[MockApp] Host.Start()")
+	logger.Println("[MockApp] Host.Start()")
 }
 
 func (host *Host) Stop(ctx context.Context) error {
-	log.Println("[MockApp] Host.Shutdown()")
+	logger.Println("[MockApp] Host.Shutdown()")
 	return nil
 }

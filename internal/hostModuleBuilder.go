@@ -1,13 +1,20 @@
 package internal
 
+import "log"
+
 type HostModuleBuilder struct {
 	module *HostModule
+	logger *log.Logger
 }
 
-func NewHostModuleBuilder() *HostModuleBuilder {
-	module := &HostModule{}
+func NewHostModuleBuilder(logger *log.Logger) *HostModuleBuilder {
+	module := &HostModule{
+		logger: logger,
+	}
+
 	return &HostModuleBuilder{
 		module: module,
+		logger: logger,
 	}
 }
 
@@ -18,11 +25,6 @@ func (builder *HostModuleBuilder) AppService(service *AppService) *HostModuleBui
 
 func (builder *HostModuleBuilder) ConfigureConfiguration(action ConfigureConfigurationAction) *HostModuleBuilder {
 	builder.module.configureConfigurationAction = action
-	return builder
-}
-
-func (builder *HostModuleBuilder) Configure(action ConfigureAction) *HostModuleBuilder {
-	builder.module.configureAction = action
 	return builder
 }
 
@@ -44,6 +46,6 @@ func (builder *HostModuleBuilder) Build() *HostModule {
 	if m.hostService == nil {
 		panic("missing HostService")
 	}
-	m.componentService = NewComponentService()
+	m.componentService = NewComponentService(builder.logger)
 	return m
 }

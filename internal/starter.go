@@ -3,7 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
-	"os"
+	"log"
 
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -14,23 +14,30 @@ var _ InjectionService = new(Starter)
 type Starter struct {
 	app *fx.App
 
+	logger *log.Logger
+
 	constructors []interface{}
 	functions    []interface{}
 
 	hostModuleBuilder *HostModuleBuilder
+
+	onInitAction         OnInitAction
+	onInitCompleteAction OnInitCompleteAction
 }
 
 func NewStarter(app interface{}) *Starter {
 	var (
+		hostLogger        = createStarterLogger()
 		appContext        = NewAppContext(app)
-		appService        = NewAppService(appContext)
-		hostModuleBuilder = NewHostModuleBuilder()
+		appService        = NewAppService(appContext, hostLogger)
+		hostModuleBuilder = NewHostModuleBuilder(hostLogger)
 	)
 
 	hostModuleBuilder.AppService(appService)
 	hostModuleBuilder.HostService(stdHostService)
 
 	return &Starter{
+		logger:            hostLogger,
 		hostModuleBuilder: hostModuleBuilder,
 	}
 }
@@ -45,8 +52,13 @@ func (s *Starter) ConfigureConfiguration(action ConfigureConfigurationAction) *S
 	return s
 }
 
-func (s *Starter) Configure(action ConfigureAction) *Starter {
-	s.hostModuleBuilder.Configure(action)
+func (s *Starter) OnInit(action OnInitAction) *Starter {
+	s.onInitAction = action
+	return s
+}
+
+func (s *Starter) OnInitComplete(action OnInitCompleteAction) *Starter {
+	s.onInitCompleteAction = action
 	return s
 }
 
@@ -87,11 +99,16 @@ func (s *Starter) build() {
 		module := s.hostModuleBuilder.Build()
 		{
 			module.Init(s)
+			if s.onInitAction != nil {
+				module.triggerOnInitEvent(s.onInitAction)
+			}
 			module.LoadConfiguration()
 			module.LoadComponent()
 			module.LoadMiddleware()
-			module.Configure()
 			module.InitComplete()
+			if s.onInitCompleteAction != nil {
+				module.triggerOnInitCompleteEvent(s.onInitCompleteAction)
+			}
 		}
 
 		// register service hook
@@ -104,9 +121,10 @@ func (s *Starter) build() {
 			fx.Invoke(s.functions...),
 			fx.WithLogger(
 				func() fxevent.Logger {
-					return &DefaultLogger{
+					return &StarterLogger{
+						Flags: s.logger.Flags(),
 						Logger: &fxevent.ConsoleLogger{
-							W: os.Stderr,
+							W: s.logger.Writer(),
 						},
 					}
 				},
@@ -121,14 +139,17 @@ func (s *Starter) makeServiceHook(module *HostModule) interface{} {
 			fx.Hook{
 				OnStart: func(ctx context.Context) error {
 					go func() {
+						s.logger.Println("STARTING")
 						module.Start(ctx)
-						logger.Println("Started")
+						s.logger.Println("RUNNING")
 					}()
 					return nil
 				},
 				OnStop: func(ctx context.Context) error {
-					logger.Println("Shutdown")
-					return module.Stop(ctx)
+					s.logger.Println("STOPPING")
+					err := module.Stop(ctx)
+					s.logger.Println("SHUTDOWN")
+					return err
 				},
 			},
 		)

@@ -6,8 +6,9 @@ import (
 )
 
 type AppContext struct {
-	rv reflect.Value
-	pv reflect.Value
+	target interface{}
+	rv     reflect.Value
+	pv     reflect.Value
 }
 
 func NewAppContext(target interface{}) *AppContext {
@@ -26,8 +27,9 @@ func NewAppContext(target interface{}) *AppContext {
 	rv = reflect.Indirect(rv)
 
 	return &AppContext{
-		rv: rv,
-		pv: rv.Addr(),
+		target: target,
+		rv:     rv,
+		pv:     rv.Addr(),
 	}
 }
 
