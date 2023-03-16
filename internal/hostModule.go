@@ -95,7 +95,7 @@ func (m *HostModule) getHost() Host {
 	if m.host == nil {
 		var (
 			rvHost          = m.appService.AppContext().Field(APP_HOST_FIELD)
-			rvHostInterface = AppContextField(rvHost).As(m.hostService.GetHostType()).Value()
+			rvHostInterface = AppContextField(rvHost).As(m.hostService.DescribeHostType()).Value()
 			host            Host
 		)
 		// check if rvHost can convert to Host interface

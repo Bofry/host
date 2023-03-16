@@ -30,7 +30,7 @@ type (
 	HostService interface {
 		Init(host Host, app *AppContext)
 		InitComplete(host Host, app *AppContext)
-		GetHostType() reflect.Type
+		DescribeHostType() reflect.Type
 	}
 
 	InjectionService interface {
