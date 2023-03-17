@@ -1,6 +1,9 @@
 package internal
 
-import "reflect"
+import (
+	"log"
+	"reflect"
+)
 
 var _ HostService = new(StdHostService)
 
@@ -11,3 +14,4 @@ func (s *StdHostService) InitComplete(host Host, app *AppContext) {}
 func (s *StdHostService) DescribeHostType() reflect.Type {
 	return typeOfHost
 }
+func (s *StdHostService) ConfigureLogger(logger *log.Logger) {}

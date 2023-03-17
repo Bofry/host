@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"log"
 	"reflect"
 
 	"github.com/Bofry/config"
@@ -31,6 +32,7 @@ type (
 		Init(host Host, app *AppContext)
 		InitComplete(host Host, app *AppContext)
 		DescribeHostType() reflect.Type
+		ConfigureLogger(logger *log.Logger)
 	}
 
 	InjectionService interface {

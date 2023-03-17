@@ -26,6 +26,9 @@ func (m *HostModule) Init(service InjectionService) {
 	// register dependency injection types
 	m.appService.RegisterConstructors(service)
 
+	// pass logger to HostService
+	m.hostService.ConfigureLogger(m.logger)
+
 	// trigger Init()
 	m.hostService.Init(m.getHost(), m.appService.AppContext())
 }
