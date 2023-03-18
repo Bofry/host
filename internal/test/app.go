@@ -12,7 +12,7 @@ var (
 )
 
 type (
-	MockApp struct {
+	App struct {
 		Host            *Host
 		Config          *Config
 		ServiceProvider *ServiceProvider
@@ -43,13 +43,13 @@ type (
 	}
 )
 
-func (app *MockApp) Init(conf *Config) {
-	fmt.Println("MockApp.Init()")
+func (app *App) Init(conf *Config) {
+	fmt.Println("App.Init()")
 
 	app.Component = &MockComponent{}
 }
 
-func (provider *ServiceProvider) Init(conf *Config, app *MockApp) {
+func (provider *ServiceProvider) Init(conf *Config, app *App) {
 	provider.RedisClient = &MockRedis{
 		Host:     conf.RedisHost,
 		Password: conf.RedisPassword,

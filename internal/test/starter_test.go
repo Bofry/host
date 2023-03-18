@@ -32,7 +32,7 @@ func TestStarter(t *testing.T) {
 
 	log.Default().SetFlags(log.Default().Flags() | log.LUTC)
 
-	app := MockApp{}
+	app := App{}
 	starter := host.Startup(&app).
 		Middlewares().
 		ConfigureConfiguration(func(service *config.ConfigurationService) {
@@ -43,12 +43,12 @@ func TestStarter(t *testing.T) {
 				Output()
 		}).
 		OnInit(func(appContext interface{}) {
-			if v, ok := appContext.(*MockApp); ok {
+			if v, ok := appContext.(*App); ok {
 				fmt.Printf("OnInit: %#v\n", v)
 			}
 		}).
 		OnInitComplete(func(appContext interface{}) {
-			if v, ok := appContext.(*MockApp); ok {
+			if v, ok := appContext.(*App); ok {
 				fmt.Printf("OnInitComplete: %#v\n", v)
 			}
 		})
