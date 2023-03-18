@@ -67,8 +67,8 @@ func (s *AppService) InitApp() {
 	)
 	s.logger.Printf("LOAD App %s", rvApp.Type())
 
-	if s.App().App() != nil {
-		s.App().App().Init()
+	if s.App().app() != nil {
+		s.App().app().Init()
 		return
 	}
 

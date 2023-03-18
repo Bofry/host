@@ -59,7 +59,7 @@ func (module *AppModule) ServiceProvider() reflect.Value {
 	return module.Field(APP_SERVICE_PROVIDER_FIELD)
 }
 
-func (module *AppModule) App() App {
+func (module *AppModule) app() App {
 	if v, ok := module.target.(App); ok {
 		return v
 	}
@@ -73,31 +73,31 @@ func (module *AppModule) ConfigureLogger(logger *log.Logger) {
 }
 
 func (module *AppModule) init() {
-	if app := module.App(); app != nil {
+	if app := module.app(); app != nil {
 		app.Init()
 	}
 }
 
 func (module *AppModule) onInit() {
-	if app := module.App(); app != nil {
+	if app := module.app(); app != nil {
 		app.OnInit()
 	}
 }
 
 func (module *AppModule) onInitComplete() {
-	if app := module.App(); app != nil {
+	if app := module.app(); app != nil {
 		app.OnInitComplete()
 	}
 }
 
 func (module *AppModule) onStart(ctx context.Context) {
-	if app := module.App(); app != nil {
+	if app := module.app(); app != nil {
 		app.OnStart(ctx)
 	}
 }
 
 func (module *AppModule) onStop(ctx context.Context) {
-	if app := module.App(); app != nil {
+	if app := module.app(); app != nil {
 		app.OnStop(ctx)
 	}
 }
