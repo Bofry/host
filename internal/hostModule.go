@@ -42,8 +42,8 @@ func (m *HostModule) LoadConfiguration() {
 		m.configureConfigurationAction(service)
 	}
 
-	m.appService.InitHost()
 	m.appService.InitApp()
+	m.appService.InitHost()
 	m.appService.InitServiceProvider()
 }
 

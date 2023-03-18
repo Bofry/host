@@ -71,19 +71,21 @@ func (s *AppService) InitApp() {
 	fn := rvApp.MethodByName(APP_COMPONENT_INIT_METHOD)
 	if fn.IsValid() {
 		if fn.Kind() != reflect.Func {
-			panic(fmt.Errorf("invalid func %s(conf %s) within type %s",
+			panic(fmt.Errorf("invalid func %s() within type %s",
 				APP_COMPONENT_INIT_METHOD,
-				rvConfig.Type().String(),
 				rvApp.Type().Name()))
 		}
-		if fn.Type().NumIn() != 1 || fn.Type().NumOut() != 0 ||
-			(fn.Type().In(0) != rvConfig.Type()) {
-			panic(fmt.Errorf("method type should be func %s.%s(conf %s)",
+		if fn.Type().NumIn() == 0 && fn.Type().NumOut() == 0 {
+			fn.Call([]reflect.Value{})
+		} else if fn.Type().NumIn() == 1 && fn.Type().NumOut() == 0 &&
+			(fn.Type().In(0) == rvConfig.Type()) {
+			fn.Call([]reflect.Value{rvConfig})
+		} else {
+			panic(fmt.Errorf("method type should be func %[1]s.%[2]s() or func %[1]s.%[2]s(conf %[3]s)",
 				rvApp.Type().String(),
 				APP_COMPONENT_INIT_METHOD,
 				rvConfig.Type().String()))
 		}
-		fn.Call([]reflect.Value{rvConfig})
 	}
 }
 
