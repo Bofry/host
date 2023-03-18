@@ -5,9 +5,9 @@ import (
 	"unsafe"
 )
 
-type AppContextField reflect.Value
+type AppModuleField reflect.Value
 
-func (f AppContextField) MakeGetter() interface{} {
+func (f AppModuleField) MakeGetter() interface{} {
 	rv := reflect.Value(f)
 	if rv.IsValid() {
 		impl := func(in []reflect.Value) []reflect.Value {
@@ -20,7 +20,7 @@ func (f AppContextField) MakeGetter() interface{} {
 	return nil
 }
 
-func (f AppContextField) As(typ reflect.Type) AppContextField {
+func (f AppModuleField) As(typ reflect.Type) AppModuleField {
 	var (
 		rv         = reflect.Value(f)
 		rvInstance reflect.Value
@@ -30,9 +30,9 @@ func (f AppContextField) As(typ reflect.Type) AppContextField {
 	} else {
 		rvInstance = reflect.NewAt(typ, unsafe.Pointer(rv.Pointer()))
 	}
-	return AppContextField(rvInstance)
+	return AppModuleField(rvInstance)
 }
 
-func (f AppContextField) Value() reflect.Value {
+func (f AppModuleField) Value() reflect.Value {
 	return reflect.Value(f)
 }

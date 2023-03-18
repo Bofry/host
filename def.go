@@ -21,13 +21,13 @@ type (
 
 // func
 type (
-	OnInitAction                 = internal.OnInitAction
-	OnInitCompleteAction         = internal.OnInitCompleteAction
 	ConfigureConfigurationAction = internal.ConfigureConfigurationAction
 )
 
 // struct
 type (
-	AppContext = internal.AppContext
-	Starter    = internal.Starter
+	App                   = internal.App
+	AppStaterConfigurator = internal.AppStaterConfigurator
+	AppModule             = internal.AppModule
+	Starter               = internal.Starter
 )

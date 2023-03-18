@@ -26,18 +26,21 @@ func (m *HostModule) Init(service InjectionService) {
 	// register dependency injection types
 	m.appService.RegisterConstructors(service)
 
+	m.appService.App().ConfigureLogger(m.logger)
+	m.appService.App().OnInit()
+
 	// pass logger to HostService
-	m.hostService.ConfigureLogger(m.logger)
+	m.hostService.ConfigureLogger(m.logger.Flags(), m.logger.Writer())
 
 	// trigger Init()
-	m.hostService.Init(m.getHost(), m.appService.AppContext())
+	m.hostService.Init(m.getHost(), m.appService.App())
 }
 
 func (m *HostModule) LoadConfiguration() {
 	m.appService.InitConfig()
 
 	if m.configureConfigurationAction != nil {
-		rvConfig := m.appService.AppContext().Field(APP_CONFIG_FIELD)
+		rvConfig := m.appService.App().Field(APP_CONFIG_FIELD)
 		service := config.NewConfigurationService(rvConfig.Interface())
 		m.configureConfigurationAction(service)
 	}
@@ -52,16 +55,17 @@ func (m *HostModule) LoadComponent() {
 }
 
 func (m *HostModule) LoadMiddleware() {
-	appCtx := m.appService.AppContext()
+	app := m.appService.App()
 	for _, v := range m.middlewares {
 		m.logger.Printf("load middleware %T", v)
-		v.Init(appCtx)
+		v.Init(app)
 	}
 }
 
 func (m *HostModule) InitComplete() {
 	// trigger InitComplete()
-	m.hostService.InitComplete(m.getHost(), m.appService.AppContext())
+	m.hostService.InitComplete(m.getHost(), m.appService.App())
+	m.appService.App().OnInitComplete()
 }
 
 func (m *HostModule) Start(ctx context.Context) {
@@ -70,35 +74,23 @@ func (m *HostModule) Start(ctx context.Context) {
 	)
 	m.componentService.Start()
 	host.Start(ctx)
+	m.appService.App().OnStart(ctx)
 }
 
 func (m *HostModule) Stop(ctx context.Context) error {
 	var (
 		host = m.getHost()
 	)
+	m.appService.App().OnStop(ctx)
 	m.componentService.Stop()
 	return host.Stop(ctx)
-}
-
-func (m *HostModule) triggerOnInitEvent(action OnInitAction) {
-	if action != nil {
-		v := m.appService.AppContext().target
-		action(v)
-	}
-}
-
-func (m *HostModule) triggerOnInitCompleteEvent(action OnInitCompleteAction) {
-	if action != nil {
-		v := m.appService.AppContext().target
-		action(v)
-	}
 }
 
 func (m *HostModule) getHost() Host {
 	if m.host == nil {
 		var (
-			rvHost          = m.appService.AppContext().Field(APP_HOST_FIELD)
-			rvHostInterface = AppContextField(rvHost).As(m.hostService.DescribeHostType()).Value()
+			rvHost          = m.appService.App().Field(APP_HOST_FIELD)
+			rvHostInterface = AppModuleField(rvHost).As(m.hostService.DescribeHostType()).Value()
 			host            Host
 		)
 		// check if rvHost can convert to Host interface

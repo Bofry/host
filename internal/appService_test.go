@@ -32,10 +32,10 @@ func (h *MockHost) Start(ctx context.Context) {
 func (h *MockHost) Stop(ctx context.Context) error { return nil }
 
 func Test(t *testing.T) {
-	appCtx := NewAppContext(&MockApp{})
-	rvConfig := appCtx.Field(APP_CONFIG_FIELD)
-	rvServiceProvider := appCtx.Field(APP_SERVICE_PROVIDER_FIELD)
-	rvHost := appCtx.Field(APP_HOST_FIELD)
+	app := NewAppModule(&MockApp{})
+	rvConfig := app.Field(APP_CONFIG_FIELD)
+	rvServiceProvider := app.Field(APP_SERVICE_PROVIDER_FIELD)
+	rvHost := app.Field(APP_HOST_FIELD)
 
 	var rvHostInterface reflect.Value
 	if rvHost.Type().ConvertibleTo(typeOfHost) {

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"io"
 	"log"
 	"reflect"
 
@@ -18,21 +19,34 @@ const (
 )
 
 var (
+	typeOfApp      = reflect.TypeOf(App(nil))
 	typeOfHost     = reflect.TypeOf((*Host)(nil)).Elem()
 	stdHostService = &StdHostService{}
 )
 
 type (
+	App interface {
+		Init()
+		OnInit()
+		OnInitComplete()
+		OnStart(ctx context.Context)
+		OnStop(ctx context.Context)
+	}
+
+	AppStaterConfigurator interface {
+		ConfigureLogger(logger *log.Logger)
+	}
+
 	Host interface {
 		Start(ctx context.Context)
 		Stop(ctx context.Context) error
 	}
 
 	HostService interface {
-		Init(host Host, app *AppContext)
-		InitComplete(host Host, app *AppContext)
+		Init(host Host, app *AppModule)
+		InitComplete(host Host, app *AppModule)
 		DescribeHostType() reflect.Type
-		ConfigureLogger(logger *log.Logger)
+		ConfigureLogger(logflags int, w io.Writer)
 	}
 
 	InjectionService interface {
@@ -42,7 +56,7 @@ type (
 	}
 
 	Middleware interface {
-		Init(appCtx *AppContext)
+		Init(app *AppModule)
 	}
 
 	Runner interface {
@@ -54,7 +68,5 @@ type (
 		Runner() Runner
 	}
 
-	OnInitAction                 func(appContext interface{})
-	OnInitCompleteAction         func(appContext interface{})
 	ConfigureConfigurationAction func(service *config.ConfigurationService)
 )

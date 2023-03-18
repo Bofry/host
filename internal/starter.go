@@ -20,16 +20,13 @@ type Starter struct {
 	functions    []interface{}
 
 	hostModuleBuilder *HostModuleBuilder
-
-	onInitAction         OnInitAction
-	onInitCompleteAction OnInitCompleteAction
 }
 
 func NewStarter(app interface{}) *Starter {
 	var (
 		hostLogger        = createStarterLogger()
-		appContext        = NewAppContext(app)
-		appService        = NewAppService(appContext, hostLogger)
+		appModule         = NewAppModule(app)
+		appService        = NewAppService(appModule, hostLogger)
 		hostModuleBuilder = NewHostModuleBuilder(hostLogger)
 	)
 
@@ -49,16 +46,6 @@ func (s *Starter) Middlewares(middlewares ...Middleware) *Starter {
 
 func (s *Starter) ConfigureConfiguration(action ConfigureConfigurationAction) *Starter {
 	s.hostModuleBuilder.ConfigureConfiguration(action)
-	return s
-}
-
-func (s *Starter) OnInit(action OnInitAction) *Starter {
-	s.onInitAction = action
-	return s
-}
-
-func (s *Starter) OnInitComplete(action OnInitCompleteAction) *Starter {
-	s.onInitCompleteAction = action
 	return s
 }
 
@@ -99,16 +86,10 @@ func (s *Starter) build() {
 		module := s.hostModuleBuilder.Build()
 		{
 			module.Init(s)
-			if s.onInitAction != nil {
-				module.triggerOnInitEvent(s.onInitAction)
-			}
 			module.LoadConfiguration()
 			module.LoadComponent()
 			module.LoadMiddleware()
 			module.InitComplete()
-			if s.onInitCompleteAction != nil {
-				module.triggerOnInitCompleteEvent(s.onInitCompleteAction)
-			}
 		}
 
 		// register service hook

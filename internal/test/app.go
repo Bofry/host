@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/Bofry/host"
 )
 
 var (
 	logger *log.Logger = log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
+)
+
+var (
+	_ host.App                   = new(App)
+	_ host.AppStaterConfigurator = new(App)
 )
 
 type (
@@ -43,10 +50,30 @@ type (
 	}
 )
 
-func (app *App) Init(conf *Config) {
+func (app *App) Init() {
 	fmt.Println("App.Init()")
 
 	app.Component = &MockComponent{}
+}
+
+func (app *App) OnInit() {
+	fmt.Println("App.OnInit()")
+}
+
+func (app *App) OnInitComplete() {
+	fmt.Println("App.OnInitComplete()")
+}
+
+func (app *App) OnStart(ctx context.Context) {
+	fmt.Println("App.OnStart()")
+}
+
+func (app *App) OnStop(ctx context.Context) {
+	fmt.Println("App.OnStop()")
+}
+
+func (app *App) ConfigureLogger(logger *log.Logger) {
+	fmt.Println("App.ConfigureLogger()")
 }
 
 func (provider *ServiceProvider) Init(conf *Config, app *App) {

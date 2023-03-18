@@ -7,13 +7,13 @@ import (
 )
 
 type AppService struct {
-	ctx    *AppContext
+	ctx    *AppModule
 	logger *log.Logger
 }
 
-func NewAppService(appCtx *AppContext, logger *log.Logger) *AppService {
+func NewAppService(app *AppModule, logger *log.Logger) *AppService {
 	return &AppService{
-		ctx:    appCtx,
+		ctx:    app,
 		logger: logger,
 	}
 }
@@ -21,9 +21,9 @@ func NewAppService(appCtx *AppContext, logger *log.Logger) *AppService {
 func (s *AppService) RegisterConstructors(service InjectionService) error {
 	ctx := s.ctx
 	var (
-		configFieldGetter          = AppContextField(ctx.Field(APP_CONFIG_FIELD)).MakeGetter()
-		serviceProviderFieldGetter = AppContextField(ctx.Field(APP_SERVICE_PROVIDER_FIELD)).MakeGetter()
-		hostFieldGetter            = AppContextField(ctx.Field(APP_HOST_FIELD)).MakeGetter()
+		configFieldGetter          = AppModuleField(ctx.Field(APP_CONFIG_FIELD)).MakeGetter()
+		serviceProviderFieldGetter = AppModuleField(ctx.Field(APP_SERVICE_PROVIDER_FIELD)).MakeGetter()
+		hostFieldGetter            = AppModuleField(ctx.Field(APP_HOST_FIELD)).MakeGetter()
 	)
 
 	service.registerConstructors(
@@ -66,6 +66,11 @@ func (s *AppService) InitApp() {
 		rvApp    = ctx.pv
 	)
 	s.logger.Printf("LOAD App %s", rvApp.Type())
+
+	if s.App().App() != nil {
+		s.App().App().Init()
+		return
+	}
 
 	// get the instance Init() method
 	fn := rvApp.MethodByName(APP_COMPONENT_INIT_METHOD)
@@ -183,6 +188,6 @@ func (s *AppService) InitServiceProvider() {
 	}
 }
 
-func (s *AppService) AppContext() *AppContext {
+func (s *AppService) App() *AppModule {
 	return s.ctx
 }

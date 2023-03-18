@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -41,16 +40,6 @@ func TestStarter(t *testing.T) {
 				LoadYamlFile("config.yaml").
 				LoadCommandArguments().
 				Output()
-		}).
-		OnInit(func(appContext interface{}) {
-			if v, ok := appContext.(*App); ok {
-				fmt.Printf("OnInit: %#v\n", v)
-			}
-		}).
-		OnInitComplete(func(appContext interface{}) {
-			if v, ok := appContext.(*App); ok {
-				fmt.Printf("OnInitComplete: %#v\n", v)
-			}
 		})
 
 	runCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -69,14 +58,14 @@ func TestStarter(t *testing.T) {
 	// assert app
 	{
 		if app.Component == nil {
-			t.Error("assert 'MockApp.Component':: should not be nil")
+			t.Error("assert 'App.Component':: should not be nil")
 		}
 	}
 
 	// assert app.Host
 	{
 		if app.Host == nil {
-			t.Error("assert 'MockApp.Host':: should not be nil")
+			t.Error("assert 'App.Host':: should not be nil")
 		}
 		host := app.Host
 		if host.address != ":10094" {
@@ -89,7 +78,7 @@ func TestStarter(t *testing.T) {
 	// assert app.Config
 	{
 		if app.Config == nil {
-			t.Error("assert 'MockApp.Config':: should not be nil")
+			t.Error("assert 'App.Config':: should not be nil")
 		}
 		conf := app.Config
 		if conf.ListenAddress != ":10094" {
@@ -117,7 +106,7 @@ func TestStarter(t *testing.T) {
 	// assert app.ServiceProvider
 	{
 		if app.ServiceProvider == nil {
-			t.Error("assert 'MockApp.ServiceProvider':: should not be nil")
+			t.Error("assert 'App.ServiceProvider':: should not be nil")
 		}
 		provider := app.ServiceProvider
 		if provider.RedisClient == nil {
