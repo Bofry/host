@@ -27,7 +27,7 @@ func (m *HostModule) Init(service InjectionService) {
 	m.appService.RegisterConstructors(service)
 
 	m.appService.App().ConfigureLogger(m.logger)
-	m.appService.App().OnInit()
+	m.appService.App().onInit()
 
 	// pass logger to HostService
 	m.hostService.ConfigureLogger(m.logger.Flags(), m.logger.Writer())
@@ -65,7 +65,7 @@ func (m *HostModule) LoadMiddleware() {
 func (m *HostModule) InitComplete() {
 	// trigger InitComplete()
 	m.hostService.InitComplete(m.getHost(), m.appService.App())
-	m.appService.App().OnInitComplete()
+	m.appService.App().onInitComplete()
 }
 
 func (m *HostModule) Start(ctx context.Context) {
@@ -74,14 +74,14 @@ func (m *HostModule) Start(ctx context.Context) {
 	)
 	m.componentService.Start()
 	host.Start(ctx)
-	m.appService.App().OnStart(ctx)
+	m.appService.App().onStart(ctx)
 }
 
 func (m *HostModule) Stop(ctx context.Context) error {
 	var (
 		host = m.getHost()
 	)
-	m.appService.App().OnStop(ctx)
+	m.appService.App().onStop(ctx)
 	m.componentService.Stop()
 	return host.Stop(ctx)
 }

@@ -72,31 +72,31 @@ func (module *AppModule) ConfigureLogger(logger *log.Logger) {
 	}
 }
 
-func (module *AppModule) Init() {
+func (module *AppModule) init() {
 	if app := module.App(); app != nil {
 		app.Init()
 	}
 }
 
-func (module *AppModule) OnInit() {
+func (module *AppModule) onInit() {
 	if app := module.App(); app != nil {
 		app.OnInit()
 	}
 }
 
-func (module *AppModule) OnInitComplete() {
+func (module *AppModule) onInitComplete() {
 	if app := module.App(); app != nil {
 		app.OnInitComplete()
 	}
 }
 
-func (module *AppModule) OnStart(ctx context.Context) {
+func (module *AppModule) onStart(ctx context.Context) {
 	if app := module.App(); app != nil {
 		app.OnStart(ctx)
 	}
 }
 
-func (module *AppModule) OnStop(ctx context.Context) {
+func (module *AppModule) onStop(ctx context.Context) {
 	if app := module.App(); app != nil {
 		app.OnStop(ctx)
 	}
