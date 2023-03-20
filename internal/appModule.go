@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+
+	"github.com/Bofry/trace"
 )
 
 var (
@@ -63,6 +65,10 @@ func (module *AppModule) Config() reflect.Value {
 
 func (module *AppModule) ServiceProvider() reflect.Value {
 	return module.Field(APP_SERVICE_PROVIDER_FIELD)
+}
+
+func (module *AppModule) TracerProvider() *trace.SeverityTracerProvider {
+	return module.appTracingConfigurator().TracerProvider()
 }
 
 func (module *AppModule) app() App {
@@ -157,4 +163,11 @@ func (proxy AppTracingConfiguratorProxy) ConfigureTracerProvider() {
 	if app := proxy.app(); app != nil {
 		app.ConfigureTracerProvider()
 	}
+}
+
+func (proxy AppTracingConfiguratorProxy) TracerProvider() *trace.SeverityTracerProvider {
+	if app := proxy.app(); app != nil {
+		return app.TracerProvider()
+	}
+	return nil
 }

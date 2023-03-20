@@ -4,8 +4,10 @@ go 1.14
 
 require (
 	github.com/Bofry/config v0.2.1-0.20230123080007-f27e105e05e2
+	github.com/Bofry/trace v0.0.0-20230317174401-681d163cadbb // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
+	go.opentelemetry.io/otel/exporters/jaeger v1.14.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/fx v1.18.2
 	go.uber.org/multierr v1.9.0 // indirect

@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/Bofry/config"
+	"github.com/Bofry/trace"
 )
 
 const (
@@ -39,6 +40,7 @@ type (
 
 	AppTracingConfigurator interface {
 		ConfigureTracerProvider()
+		TracerProvider() *trace.SeverityTracerProvider
 	}
 
 	Host interface {

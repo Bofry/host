@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Bofry/host"
+	"github.com/Bofry/trace"
 )
 
 var (
@@ -79,6 +80,11 @@ func (app *App) ConfigureLogger(logger *log.Logger) {
 
 func (app *App) ConfigureTracerProvider() {
 	fmt.Println("App.ConfigureTracerProvider()")
+}
+
+func (app *App) TracerProvider() *trace.SeverityTracerProvider {
+	fmt.Println("App.TracerProvider()")
+	return nil
 }
 
 func (provider *ServiceProvider) Init(conf *Config, app *App) {
