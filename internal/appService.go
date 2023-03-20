@@ -12,7 +12,6 @@ import (
 type AppService struct {
 	appModule   *AppModule
 	hostService *HostService
-	hostModule  HostModule
 
 	componentService *ComponentService
 
@@ -33,15 +32,11 @@ func (s *AppService) Init(service InjectionService) {
 
 	// pass logger to HostService
 	s.hostService.ConfigureLogger(s.logger.Flags(), s.logger.Writer())
-
-	// trigger Init()
-	s.hostService.Init(s.appModule)
 }
 
-func (m *AppService) InitComplete() {
-	// trigger InitComplete()
-	m.hostService.InitComplete(m.appModule)
-	m.appModule.app().OnInitComplete()
+func (s *AppService) InitComplete() {
+	s.hostService.InitComplete(s.appModule)
+	s.appModule.app().OnInitComplete()
 }
 
 func (s *AppService) LoadConfiguration() {
@@ -54,6 +49,7 @@ func (s *AppService) LoadConfiguration() {
 	}
 
 	s.initApp()
+	s.hostService.Init(s.appModule)
 	s.initHost()
 	s.initServiceProvider()
 }
@@ -226,23 +222,4 @@ func (s *AppService) initServiceProvider() {
 		}
 		fn.Call(args)
 	}
-}
-
-func (m *AppService) getHost() Host {
-	if m.hostService == nil {
-		var (
-			rvHost          = m.appModule.Field(APP_HOST_FIELD)
-			rvHostInterface = AppModuleField(rvHost).As(m.hostModule.DescribeHostType()).Value()
-			host            Host
-		)
-		// check if rvHost can convert to Host interface
-		host, ok := rvHostInterface.Interface().(Host)
-		if !ok {
-			panic(fmt.Errorf("specified field 'Host' type '%s' cannot convert to '%s' interface",
-				rvHost.Type().String(),
-				typeOfHost.String()))
-		}
-		m.host1 = host
-	}
-	return m.hostService
 }
