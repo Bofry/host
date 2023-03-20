@@ -7,6 +7,12 @@ import (
 	"reflect"
 )
 
+var (
+	_ App                    = AppProxy{}
+	_ AppStaterConfigurator  = AppStaterConfiguratorProxy{}
+	_ AppTracingConfigurator = AppTracingConfiguratorProxy{}
+)
+
 type AppModule struct {
 	target interface{}
 	rv     reflect.Value
@@ -60,44 +66,95 @@ func (module *AppModule) ServiceProvider() reflect.Value {
 }
 
 func (module *AppModule) app() App {
-	if v, ok := module.target.(App); ok {
+	return AppProxy{module: module}
+}
+
+func (module *AppModule) appStaterConfigurator() AppStaterConfigurator {
+	return AppStaterConfiguratorProxy{module: module}
+}
+
+func (module *AppModule) appTracingConfigurator() AppTracingConfigurator {
+	return AppTracingConfiguratorProxy{module: module}
+}
+
+type AppProxy struct {
+	module *AppModule
+}
+
+func (proxy AppProxy) app() App {
+	if v, ok := proxy.module.target.(App); ok {
 		return v
 	}
 	return nil
 }
 
-func (module *AppModule) ConfigureLogger(logger *log.Logger) {
-	if configurator, ok := module.target.(AppStaterConfigurator); ok {
-		configurator.ConfigureLogger(logger)
-	}
-}
-
-func (module *AppModule) init() {
-	if app := module.app(); app != nil {
+// Init implements App
+func (proxy AppProxy) Init() {
+	if app := proxy.app(); app != nil {
 		app.Init()
 	}
 }
 
-func (module *AppModule) onInit() {
-	if app := module.app(); app != nil {
+// OnInit implements App
+func (proxy AppProxy) OnInit() {
+	if app := proxy.app(); app != nil {
 		app.OnInit()
 	}
 }
 
-func (module *AppModule) onInitComplete() {
-	if app := module.app(); app != nil {
+// OnInitComplete implements App
+func (proxy AppProxy) OnInitComplete() {
+	if app := proxy.app(); app != nil {
 		app.OnInitComplete()
 	}
 }
 
-func (module *AppModule) onStart(ctx context.Context) {
-	if app := module.app(); app != nil {
+// OnStart implements App
+func (proxy AppProxy) OnStart(ctx context.Context) {
+	if app := proxy.app(); app != nil {
 		app.OnStart(ctx)
 	}
 }
 
-func (module *AppModule) onStop(ctx context.Context) {
-	if app := module.app(); app != nil {
+// OnStop implements App
+func (proxy AppProxy) OnStop(ctx context.Context) {
+	if app := proxy.app(); app != nil {
 		app.OnStop(ctx)
+	}
+}
+
+type AppStaterConfiguratorProxy struct {
+	module *AppModule
+}
+
+func (proxy AppStaterConfiguratorProxy) app() AppStaterConfigurator {
+	if v, ok := proxy.module.target.(AppStaterConfigurator); ok {
+		return v
+	}
+	return nil
+}
+
+// ConfigureLogger implements AppStaterConfigurator
+func (proxy AppStaterConfiguratorProxy) ConfigureLogger(logger *log.Logger) {
+	if app := proxy.app(); app != nil {
+		app.ConfigureLogger(logger)
+	}
+}
+
+type AppTracingConfiguratorProxy struct {
+	module *AppModule
+}
+
+func (proxy AppTracingConfiguratorProxy) app() AppTracingConfigurator {
+	if v, ok := proxy.module.target.(AppTracingConfigurator); ok {
+		return v
+	}
+	return nil
+}
+
+// ConfigureTracerProvider implements tracing.AppTracingConfigurator
+func (proxy AppTracingConfiguratorProxy) ConfigureTracerProvider() {
+	if app := proxy.app(); app != nil {
+		app.ConfigureTracerProvider()
 	}
 }

@@ -7,19 +7,19 @@ import (
 )
 
 type AppService struct {
-	ctx    *AppModule
+	module *AppModule
 	logger *log.Logger
 }
 
 func NewAppService(app *AppModule, logger *log.Logger) *AppService {
 	return &AppService{
-		ctx:    app,
+		module: app,
 		logger: logger,
 	}
 }
 
 func (s *AppService) RegisterConstructors(service InjectionService) error {
-	ctx := s.ctx
+	ctx := s.module
 	var (
 		configFieldGetter          = AppModuleField(ctx.Field(APP_CONFIG_FIELD)).MakeGetter()
 		serviceProviderFieldGetter = AppModuleField(ctx.Field(APP_SERVICE_PROVIDER_FIELD)).MakeGetter()
@@ -35,7 +35,7 @@ func (s *AppService) RegisterConstructors(service InjectionService) error {
 }
 
 func (s *AppService) RegisterComponents(service *ComponentService) {
-	ctx := s.ctx
+	ctx := s.module
 	var (
 		rvApp = ctx.rv
 	)
@@ -60,42 +60,18 @@ func (s *AppService) RegisterComponents(service *ComponentService) {
 }
 
 func (s *AppService) InitApp() {
-	ctx := s.ctx
+	ctx := s.module
 	var (
-		rvConfig = ctx.Field(APP_CONFIG_FIELD)
-		rvApp    = ctx.pv
+		rvApp = ctx.pv
 	)
 	s.logger.Printf("LOAD App %s", rvApp.Type())
 
-	if s.App().app() != nil {
-		s.App().app().Init()
-		return
-	}
-
-	// get the instance Init() method
-	fn := rvApp.MethodByName(APP_COMPONENT_INIT_METHOD)
-	if fn.IsValid() {
-		if fn.Kind() != reflect.Func {
-			panic(fmt.Errorf("invalid func %s() within type %s",
-				APP_COMPONENT_INIT_METHOD,
-				rvApp.Type().Name()))
-		}
-		if fn.Type().NumIn() == 0 && fn.Type().NumOut() == 0 {
-			fn.Call([]reflect.Value{})
-		} else if fn.Type().NumIn() == 1 && fn.Type().NumOut() == 0 &&
-			(fn.Type().In(0) == rvConfig.Type()) {
-			fn.Call([]reflect.Value{rvConfig})
-		} else {
-			panic(fmt.Errorf("method type should be func %[1]s.%[2]s() or func %[1]s.%[2]s(conf %[3]s)",
-				rvApp.Type().String(),
-				APP_COMPONENT_INIT_METHOD,
-				rvConfig.Type().String()))
-		}
-	}
+	s.module.app().Init()
+	s.module.appTracingConfigurator().ConfigureTracerProvider()
 }
 
 func (s *AppService) InitConfig() {
-	ctx := s.ctx
+	ctx := s.module
 	var (
 		rvConfig = ctx.Field(APP_CONFIG_FIELD)
 	)
@@ -120,7 +96,7 @@ func (s *AppService) InitConfig() {
 }
 
 func (s *AppService) InitHost() {
-	ctx := s.ctx
+	ctx := s.module
 	var (
 		rvConfig = ctx.Field(APP_CONFIG_FIELD)
 		rvHost   = ctx.Field(APP_HOST_FIELD)
@@ -150,7 +126,7 @@ func (s *AppService) InitHost() {
 }
 
 func (s *AppService) InitServiceProvider() {
-	ctx := s.ctx
+	ctx := s.module
 	var (
 		rvConfig          = ctx.Field(APP_CONFIG_FIELD)
 		rvServiceProvider = ctx.Field(APP_SERVICE_PROVIDER_FIELD)
@@ -188,6 +164,6 @@ func (s *AppService) InitServiceProvider() {
 	}
 }
 
-func (s *AppService) App() *AppModule {
-	return s.ctx
+func (s *AppService) AppModule() *AppModule {
+	return s.module
 }

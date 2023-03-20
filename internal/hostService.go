@@ -8,10 +8,10 @@ import (
 	"github.com/Bofry/config"
 )
 
-type HostModule struct {
+type HostService struct {
 	appService *AppService
 
-	hostService      HostService
+	hostService      HostModule
 	componentService *ComponentService
 
 	middlewares                  []Middleware
@@ -22,25 +22,25 @@ type HostModule struct {
 	host Host
 }
 
-func (m *HostModule) Init(service InjectionService) {
+func (m *HostService) Init(service InjectionService) {
 	// register dependency injection types
 	m.appService.RegisterConstructors(service)
 
-	m.appService.App().ConfigureLogger(m.logger)
-	m.appService.App().onInit()
+	m.appService.AppModule().appStaterConfigurator().ConfigureLogger(m.logger)
+	m.appService.AppModule().app().OnInit()
 
 	// pass logger to HostService
 	m.hostService.ConfigureLogger(m.logger.Flags(), m.logger.Writer())
 
 	// trigger Init()
-	m.hostService.Init(m.getHost(), m.appService.App())
+	m.hostService.Init(m.getHost(), m.appService.AppModule())
 }
 
-func (m *HostModule) LoadConfiguration() {
+func (m *HostService) LoadConfiguration() {
 	m.appService.InitConfig()
 
 	if m.configureConfigurationAction != nil {
-		rvConfig := m.appService.App().Field(APP_CONFIG_FIELD)
+		rvConfig := m.appService.AppModule().Field(APP_CONFIG_FIELD)
 		service := config.NewConfigurationService(rvConfig.Interface())
 		m.configureConfigurationAction(service)
 	}
@@ -50,46 +50,46 @@ func (m *HostModule) LoadConfiguration() {
 	m.appService.InitServiceProvider()
 }
 
-func (m *HostModule) LoadComponent() {
+func (m *HostService) LoadComponent() {
 	m.appService.RegisterComponents(m.componentService)
 }
 
-func (m *HostModule) LoadMiddleware() {
-	app := m.appService.App()
+func (m *HostService) LoadMiddleware() {
+	app := m.appService.AppModule()
 	for _, v := range m.middlewares {
 		m.logger.Printf("load middleware %T", v)
 		v.Init(app)
 	}
 }
 
-func (m *HostModule) InitComplete() {
+func (m *HostService) InitComplete() {
 	// trigger InitComplete()
-	m.hostService.InitComplete(m.getHost(), m.appService.App())
-	m.appService.App().onInitComplete()
+	m.hostService.InitComplete(m.getHost(), m.appService.AppModule())
+	m.appService.AppModule().app().OnInitComplete()
 }
 
-func (m *HostModule) Start(ctx context.Context) {
+func (m *HostService) Start(ctx context.Context) {
 	var (
 		host = m.getHost()
 	)
 	m.componentService.Start()
 	host.Start(ctx)
-	m.appService.App().onStart(ctx)
+	m.appService.AppModule().app().OnStart(ctx)
 }
 
-func (m *HostModule) Stop(ctx context.Context) error {
+func (m *HostService) Stop(ctx context.Context) error {
 	var (
 		host = m.getHost()
 	)
-	m.appService.App().onStop(ctx)
+	m.appService.AppModule().app().OnStop(ctx)
 	m.componentService.Stop()
 	return host.Stop(ctx)
 }
 
-func (m *HostModule) getHost() Host {
+func (m *HostService) getHost() Host {
 	if m.host == nil {
 		var (
-			rvHost          = m.appService.App().Field(APP_HOST_FIELD)
+			rvHost          = m.appService.AppModule().Field(APP_HOST_FIELD)
 			rvHostInterface = AppModuleField(rvHost).As(m.hostService.DescribeHostType()).Value()
 			host            Host
 		)

@@ -11,12 +11,12 @@ const (
 
 // interface
 type (
-	Host        = internal.Host
-	HostService = internal.HostService
-	Middleware  = internal.Middleware
-	Runner      = internal.Runner
-	Component   = internal.Runner
-	Runable     = internal.Runable
+	Host       = internal.Host
+	HostModule = internal.HostModule
+	Middleware = internal.Middleware
+	Runner     = internal.Runner
+	Component  = internal.Runner
+	Runable    = internal.Runable
 )
 
 // func
@@ -26,8 +26,9 @@ type (
 
 // struct
 type (
-	App                   = internal.App
-	AppStaterConfigurator = internal.AppStaterConfigurator
-	AppModule             = internal.AppModule
-	Starter               = internal.Starter
+	App                    = internal.App
+	AppStaterConfigurator  = internal.AppStaterConfigurator
+	AppTracingConfigurator = internal.AppTracingConfigurator
+	AppModule              = internal.AppModule
+	Starter                = internal.Starter
 )

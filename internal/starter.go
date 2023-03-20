@@ -19,7 +19,7 @@ type Starter struct {
 	constructors []interface{}
 	functions    []interface{}
 
-	hostModuleBuilder *HostModuleBuilder
+	hostModuleBuilder *HostServiceBuilder
 }
 
 func NewStarter(app interface{}) *Starter {
@@ -114,7 +114,7 @@ func (s *Starter) build() {
 	}
 }
 
-func (s *Starter) makeServiceHook(module *HostModule) interface{} {
+func (s *Starter) makeServiceHook(module *HostService) interface{} {
 	return func(lc fx.Lifecycle) {
 		lc.Append(
 			fx.Hook{

@@ -21,7 +21,7 @@ const (
 var (
 	typeOfApp      = reflect.TypeOf(App(nil))
 	typeOfHost     = reflect.TypeOf((*Host)(nil)).Elem()
-	stdHostService = &StdHostService{}
+	stdHostService = &StdHostModule{}
 )
 
 type (
@@ -37,12 +37,16 @@ type (
 		ConfigureLogger(logger *log.Logger)
 	}
 
+	AppTracingConfigurator interface {
+		ConfigureTracerProvider()
+	}
+
 	Host interface {
 		Start(ctx context.Context)
 		Stop(ctx context.Context) error
 	}
 
-	HostService interface {
+	HostModule interface {
 		Init(host Host, app *AppModule)
 		InitComplete(host Host, app *AppModule)
 		DescribeHostType() reflect.Type

@@ -14,8 +14,9 @@ var (
 )
 
 var (
-	_ host.App                   = new(App)
-	_ host.AppStaterConfigurator = new(App)
+	_ host.App                    = new(App)
+	_ host.AppStaterConfigurator  = new(App)
+	_ host.AppTracingConfigurator = new(App)
 )
 
 type (
@@ -74,6 +75,10 @@ func (app *App) OnStop(ctx context.Context) {
 
 func (app *App) ConfigureLogger(logger *log.Logger) {
 	fmt.Println("App.ConfigureLogger()")
+}
+
+func (app *App) ConfigureTracerProvider() {
+	fmt.Println("App.ConfigureTracerProvider()")
 }
 
 func (provider *ServiceProvider) Init(conf *Config, app *App) {

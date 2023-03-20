@@ -1,11 +1,11 @@
 package internal
 
-func RegisterHostService(starter *Starter, service HostService) {
+func RegisterHostService(starter *Starter, service HostModule) {
 	if service != nil {
 		starter.hostModuleBuilder.HostService(service)
 	}
 }
 
-func StdHostServiceInstance() HostService {
+func StdHostServiceInstance() HostModule {
 	return stdHostService
 }
