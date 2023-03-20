@@ -3,94 +3,43 @@ package internal
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
-
-	"github.com/Bofry/config"
 )
 
 type HostService struct {
-	appService *AppService
-
-	hostService      HostModule
-	componentService *ComponentService
-
-	middlewares                  []Middleware
-	configureConfigurationAction ConfigureConfigurationAction
+	hostModule HostModule
 
 	logger *log.Logger
 
 	host Host
 }
 
-func (m *HostService) Init(service InjectionService) {
-	// register dependency injection types
-	m.appService.RegisterConstructors(service)
-
-	m.appService.AppModule().appStaterConfigurator().ConfigureLogger(m.logger)
-	m.appService.AppModule().app().OnInit()
-
-	// pass logger to HostService
-	m.hostService.ConfigureLogger(m.logger.Flags(), m.logger.Writer())
-
-	// trigger Init()
-	m.hostService.Init(m.getHost(), m.appService.AppModule())
+func (m *HostService) ConfigureLogger(logflags int, w io.Writer) {
+	m.hostModule.ConfigureLogger(logflags, w)
 }
 
-func (m *HostService) LoadConfiguration() {
-	m.appService.InitConfig()
-
-	if m.configureConfigurationAction != nil {
-		rvConfig := m.appService.AppModule().Field(APP_CONFIG_FIELD)
-		service := config.NewConfigurationService(rvConfig.Interface())
-		m.configureConfigurationAction(service)
-	}
-
-	m.appService.InitApp()
-	m.appService.InitHost()
-	m.appService.InitServiceProvider()
+func (m *HostService) Init(app *AppModule) {
+	m.hostModule.Init(m.host, app)
 }
 
-func (m *HostService) LoadComponent() {
-	m.appService.RegisterComponents(m.componentService)
-}
-
-func (m *HostService) LoadMiddleware() {
-	app := m.appService.AppModule()
-	for _, v := range m.middlewares {
-		m.logger.Printf("load middleware %T", v)
-		v.Init(app)
-	}
-}
-
-func (m *HostService) InitComplete() {
-	// trigger InitComplete()
-	m.hostService.InitComplete(m.getHost(), m.appService.AppModule())
-	m.appService.AppModule().app().OnInitComplete()
+func (m *HostService) InitComplete(app *AppModule) {
+	m.hostModule.InitComplete(m.host, app)
 }
 
 func (m *HostService) Start(ctx context.Context) {
-	var (
-		host = m.getHost()
-	)
-	m.componentService.Start()
-	host.Start(ctx)
-	m.appService.AppModule().app().OnStart(ctx)
+	m.host.Start(ctx)
 }
 
 func (m *HostService) Stop(ctx context.Context) error {
-	var (
-		host = m.getHost()
-	)
-	m.appService.AppModule().app().OnStop(ctx)
-	m.componentService.Stop()
-	return host.Stop(ctx)
+	return m.host.Stop(ctx)
 }
 
-func (m *HostService) getHost() Host {
+func (m *HostService) registerHost(app *AppModule) Host {
 	if m.host == nil {
 		var (
-			rvHost          = m.appService.AppModule().Field(APP_HOST_FIELD)
-			rvHostInterface = AppModuleField(rvHost).As(m.hostService.DescribeHostType()).Value()
+			rvHost          = app.Field(APP_HOST_FIELD)
+			rvHostInterface = AppModuleField(rvHost).As(m.hostModule.DescribeHostType()).Value()
 			host            Host
 		)
 		// check if rvHost can convert to Host interface

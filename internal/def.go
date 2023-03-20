@@ -19,9 +19,9 @@ const (
 )
 
 var (
-	typeOfApp      = reflect.TypeOf(App(nil))
-	typeOfHost     = reflect.TypeOf((*Host)(nil)).Elem()
-	stdHostService = &StdHostModule{}
+	typeOfApp              = reflect.TypeOf(App(nil))
+	typeOfHost             = reflect.TypeOf((*Host)(nil)).Elem()
+	stdHostModuleSingleton = &StdHostModule{}
 )
 
 type (

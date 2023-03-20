@@ -19,33 +19,31 @@ type Starter struct {
 	constructors []interface{}
 	functions    []interface{}
 
-	hostModuleBuilder *HostServiceBuilder
+	appServiceBuilder *AppServiceBuilder
 }
 
 func NewStarter(app interface{}) *Starter {
 	var (
 		hostLogger        = createStarterLogger()
 		appModule         = NewAppModule(app)
-		appService        = NewAppService(appModule, hostLogger)
-		hostModuleBuilder = NewHostModuleBuilder(hostLogger)
+		appServiceBuilder = NewAppServiceBuilder(hostLogger)
 	)
 
-	hostModuleBuilder.AppService(appService)
-	hostModuleBuilder.HostService(stdHostService)
+	appServiceBuilder.AppModule(appModule)
 
 	return &Starter{
 		logger:            hostLogger,
-		hostModuleBuilder: hostModuleBuilder,
+		appServiceBuilder: appServiceBuilder,
 	}
 }
 
 func (s *Starter) Middlewares(middlewares ...Middleware) *Starter {
-	s.hostModuleBuilder.Middlewares(middlewares)
+	s.appServiceBuilder.Middlewares(middlewares)
 	return s
 }
 
 func (s *Starter) ConfigureConfiguration(action ConfigureConfigurationAction) *Starter {
-	s.hostModuleBuilder.ConfigureConfiguration(action)
+	s.appServiceBuilder.ConfigureConfigurationAction(action)
 	return s
 }
 
@@ -82,18 +80,18 @@ func (s *Starter) registerFunctions(functions ...interface{}) {
 
 func (s *Starter) build() {
 	if s.app == nil {
-		// build and initialize HostModule
-		module := s.hostModuleBuilder.Build()
+		// build and initialize AppService
+		service := s.appServiceBuilder.Build()
 		{
-			module.Init(s)
-			module.LoadConfiguration()
-			module.LoadComponent()
-			module.LoadMiddleware()
-			module.InitComplete()
+			service.Init(s)
+			service.LoadConfiguration()
+			service.LoadComponent()
+			service.LoadMiddleware()
+			service.InitComplete()
 		}
 
 		// register service hook
-		hook := s.makeServiceHook(module)
+		hook := s.makeServiceHook(service)
 		s.registerFunctions(hook)
 
 		// build fx.App
@@ -114,7 +112,7 @@ func (s *Starter) build() {
 	}
 }
 
-func (s *Starter) makeServiceHook(module *HostService) interface{} {
+func (s *Starter) makeServiceHook(module *AppService) interface{} {
 	return func(lc fx.Lifecycle) {
 		lc.Append(
 			fx.Hook{
