@@ -7,8 +7,8 @@ import (
 //go:linkname Startup github.com/Bofry/host/internal.NewStarter
 func Startup(app interface{}) *Starter
 
-//go:linkname RegisterHostService github.com/Bofry/host/internal.RegisterHostService
-func RegisterHostService(starter *Starter, service HostModule)
+//go:linkname RegisterHostModule github.com/Bofry/host/internal.RegisterHostModule
+func RegisterHostModule(starter *Starter, service HostModule)
 
 //go:linkname StdHostServiceInstance github.com/Bofry/host/internal.StdHostServiceInstance
 func StdHostServiceInstance() HostModule
