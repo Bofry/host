@@ -71,6 +71,10 @@ func (module *AppModule) TracerProvider() *trace.SeverityTracerProvider {
 	return module.appTracingConfigurator().TracerProvider()
 }
 
+func (module *AppModule) Logger() *log.Logger {
+	return module.appStaterConfigurator().Logger()
+}
+
 func (module *AppModule) app() App {
 	return AppProxy{module: module}
 }
