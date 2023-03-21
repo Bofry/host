@@ -147,6 +147,14 @@ func (proxy AppStaterConfiguratorProxy) ConfigureLogger(logger *log.Logger) {
 	}
 }
 
+// ConfigureLogger implements AppStaterConfigurator
+func (proxy AppStaterConfiguratorProxy) Logger() *log.Logger {
+	if app := proxy.app(); app != nil {
+		return app.Logger()
+	}
+	return log.Default()
+}
+
 type AppTracingConfiguratorProxy struct {
 	module *AppModule
 }

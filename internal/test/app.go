@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	logger *log.Logger = log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
+	logger *log.Logger = log.New(os.Stdout, "[host-demo] ", log.LstdFlags|log.Lmsgprefix|log.LUTC)
 )
 
 var (
@@ -76,6 +76,11 @@ func (app *App) OnStop(ctx context.Context) {
 
 func (app *App) ConfigureLogger(logger *log.Logger) {
 	fmt.Println("App.ConfigureLogger()")
+}
+
+func (app *App) Logger() *log.Logger {
+	fmt.Println("App.Logger()")
+	return logger
 }
 
 func (app *App) ConfigureTracerProvider() {

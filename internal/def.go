@@ -36,6 +36,7 @@ type (
 
 	AppStaterConfigurator interface {
 		ConfigureLogger(logger *log.Logger)
+		Logger() *log.Logger
 	}
 
 	AppTracingConfigurator interface {
