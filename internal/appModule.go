@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/Bofry/trace"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 var (
@@ -69,6 +70,10 @@ func (module *AppModule) ServiceProvider() reflect.Value {
 
 func (module *AppModule) TracerProvider() *trace.SeverityTracerProvider {
 	return module.appTracingConfigurator().TracerProvider()
+}
+
+func (module *AppModule) TextMapPropagator() propagation.TextMapPropagator {
+	return module.appTracingConfigurator().TextMapPropagator()
 }
 
 func (module *AppModule) Logger() *log.Logger {
@@ -170,6 +175,13 @@ func (proxy AppTracingConfiguratorProxy) app() AppTracingConfigurator {
 	return nil
 }
 
+// ConfigureTextMapPropagator implements tracing.AppTracingConfigurator
+func (proxy AppTracingConfiguratorProxy) ConfigureTextMapPropagator() {
+	if app := proxy.app(); app != nil {
+		app.ConfigureTextMapPropagator()
+	}
+}
+
 // ConfigureTracerProvider implements tracing.AppTracingConfigurator
 func (proxy AppTracingConfiguratorProxy) ConfigureTracerProvider() {
 	if app := proxy.app(); app != nil {
@@ -177,6 +189,15 @@ func (proxy AppTracingConfiguratorProxy) ConfigureTracerProvider() {
 	}
 }
 
+// TextMapPropagator implements tracing.AppTracingConfigurator
+func (proxy AppTracingConfiguratorProxy) TextMapPropagator() propagation.TextMapPropagator {
+	if app := proxy.app(); app != nil {
+		return app.TextMapPropagator()
+	}
+	return nil
+}
+
+// TracerProvider implements tracing.AppTracingConfigurator
 func (proxy AppTracingConfiguratorProxy) TracerProvider() *trace.SeverityTracerProvider {
 	if app := proxy.app(); app != nil {
 		return app.TracerProvider()

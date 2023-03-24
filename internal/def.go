@@ -8,6 +8,7 @@ import (
 
 	"github.com/Bofry/config"
 	"github.com/Bofry/trace"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 const (
@@ -40,7 +41,9 @@ type (
 	}
 
 	AppTracingConfigurator interface {
+		ConfigureTextMapPropagator()
 		ConfigureTracerProvider()
+		TextMapPropagator() propagation.TextMapPropagator
 		TracerProvider() *trace.SeverityTracerProvider
 	}
 

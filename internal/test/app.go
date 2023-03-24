@@ -8,6 +8,7 @@ import (
 
 	"github.com/Bofry/host"
 	"github.com/Bofry/trace"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 var (
@@ -89,6 +90,15 @@ func (app *App) ConfigureTracerProvider() {
 
 func (app *App) TracerProvider() *trace.SeverityTracerProvider {
 	fmt.Println("App.TracerProvider()")
+	return nil
+}
+
+func (app *App) ConfigureTextMapPropagator() {
+	fmt.Println("App.ConfigureTextMapPropagator()")
+}
+
+func (app *App) TextMapPropagator() propagation.TextMapPropagator {
+	fmt.Println("App.TextMapPropagator()")
 	return nil
 }
 
