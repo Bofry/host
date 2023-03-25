@@ -4,6 +4,8 @@ github.com/Bofry/structproto v0.2.0-alpha.20221227043020 h1:R/pdSosp1eZA+Dx8Mz31
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
 github.com/Bofry/trace v0.0.0-20230325064919-d16dfcd5ab47 h1:BpZaEkfu7E+12jFzfqBpa+SMErneXbn4NkB1MQZx4Oo=
 github.com/Bofry/trace v0.0.0-20230325064919-d16dfcd5ab47/go.mod h1:PZxbK9ssiNWGM0rYpT5Xm3h6vkKQLze/7kCxdbNYgFQ=
+github.com/Bofry/trace v0.0.0-20230325171344-630494792785 h1:ixBaCMJsNuJEXHIlVi+Vra8criip2Va2zcRE+bjt2dw=
+github.com/Bofry/trace v0.0.0-20230325171344-630494792785/go.mod h1:PZxbK9ssiNWGM0rYpT5Xm3h6vkKQLze/7kCxdbNYgFQ=
 github.com/Bofry/types v0.1.0 h1:lEM+LcPWlC1ByerJlp0cZ4tCCosR9lemVDvu9kATV1Y=
 github.com/Bofry/types v0.1.0/go.mod h1:O0I2TpZ3YfKDgTnJO5zeaX9LO7vtdhGnwbz/oP4cKUw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
