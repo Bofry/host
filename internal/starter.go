@@ -112,21 +112,21 @@ func (s *Starter) build() {
 	}
 }
 
-func (s *Starter) makeServiceHook(module *AppService) interface{} {
+func (s *Starter) makeServiceHook(service *AppService) interface{} {
 	return func(lc fx.Lifecycle) {
 		lc.Append(
 			fx.Hook{
 				OnStart: func(ctx context.Context) error {
 					go func() {
 						s.logger.Println("STARTING")
-						module.Start(ctx)
+						service.Start(ctx)
 						s.logger.Println("RUNNING")
 					}()
 					return nil
 				},
 				OnStop: func(ctx context.Context) error {
 					s.logger.Println("STOPPING")
-					err := module.Stop(ctx)
+					err := service.Stop(ctx)
 					s.logger.Println("SHUTDOWN")
 					return err
 				},
