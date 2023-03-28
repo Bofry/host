@@ -127,6 +127,7 @@ func (s *AppService) initApp() {
 	s.logger.Printf("LOAD App %s", rvApp.Type())
 
 	s.appModule.app().Init()
+	s.appModule.appTracingConfigurator().ConfigureTextMapPropagator()
 	s.appModule.appTracingConfigurator().ConfigureTracerProvider()
 }
 
