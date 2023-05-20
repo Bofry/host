@@ -40,6 +40,27 @@ func (l *StarterLogger) LogEvent(event fxevent.Event) {
 			*buf = append(*buf, ' ')
 		}
 	}
-	l.Logger.W.Write(buffer)
-	l.Logger.LogEvent(event)
+
+	// NOTE: fxevent.ConsoleLogger will not write anything under
+	//       below situations.
+	var skipped bool = false
+	switch e := event.(type) {
+	case *fxevent.Provided:
+		skipped = !(len(e.OutputTypeNames) > 0 || e.Err != nil)
+	case *fxevent.Replaced:
+		skipped = !(len(e.OutputTypeNames) > 0 || e.Err != nil)
+	case *fxevent.Decorated:
+		skipped = !(len(e.OutputTypeNames) > 0 || e.Err != nil)
+	case *fxevent.Invoked:
+		skipped = !(e.Err != nil)
+	case *fxevent.Stopped:
+		skipped = !(e.Err != nil)
+	case *fxevent.RolledBack:
+		skipped = !(e.Err != nil)
+	}
+
+	if !skipped {
+		l.Logger.W.Write(buffer)
+		l.Logger.LogEvent(event)
+	}
 }
