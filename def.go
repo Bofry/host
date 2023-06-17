@@ -26,10 +26,10 @@ type (
 
 // struct
 type (
-	App                    = internal.App
-	AppStaterConfigurator  = internal.AppStaterConfigurator
-	AppTracingConfigurator = internal.AppTracingConfigurator
-	AppModule              = internal.AppModule
-	HostEventHandler       = internal.HostOnErrorEventHandler
-	Starter                = internal.Starter
+	App                     = internal.App
+	AppStaterConfigurator   = internal.AppStaterConfigurator
+	AppTracingConfigurator  = internal.AppTracingConfigurator
+	AppModule               = internal.AppModule
+	HostOnErrorEventHandler = internal.HostOnErrorEventHandler
+	Starter                 = internal.Starter
 )
