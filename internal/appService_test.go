@@ -36,11 +36,14 @@ func (h *MyHost) OnError(err error) (disposed bool) {
 }
 
 func TestAppModule(t *testing.T) {
-	app := NewAppModule(&MockApp{})
-	rvConfig := app.Config()
-	rvServiceProvider := app.ServiceProvider()
-	rvHost := app.Host()
+	var (
+		app               = NewAppModule(&MockApp{})
+		rvConfig          = app.Config()
+		rvServiceProvider = app.ServiceProvider()
+		rvHost            = app.Host()
+	)
 
+	// TODO: add test assertion
 	var rvHostInterface reflect.Value
 	if rvHost.Type().ConvertibleTo(typeOfHost) {
 		rvHostInterface = rvHost.Convert(typeOfHost)
@@ -61,10 +64,10 @@ func TestAppModule(t *testing.T) {
 
 	host, _ := rvHostInterface.Interface().(Host)
 
-	hostHelper := &HostHelper{
+	hostHelper := &AppHostHelper{
 		App: app,
 	}
-	hostOnError := hostHelper.ExtractHostOnError()
-	t.Logf("hostOnError: %+v\n", hostOnError)
+	handler := hostHelper.OnErrorEventHandler()
+	t.Logf("OnErrorEventHandler: %+v\n", handler)
 	host.Start(context.Background())
 }

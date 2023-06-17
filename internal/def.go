@@ -52,7 +52,7 @@ type (
 		Stop(ctx context.Context) error
 	}
 
-	HostOnError interface {
+	HostOnErrorEventHandler interface {
 		OnError(err error) (disposed bool)
 	}
 

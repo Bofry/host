@@ -1,13 +1,13 @@
 package internal
 
-type HostHelper struct {
+type AppHostHelper struct {
 	App *AppModule
 }
 
-func (h *HostHelper) ExtractHostOnError() HostOnError {
+func (h *AppHostHelper) OnErrorEventHandler() HostOnErrorEventHandler {
 	host := ReflectHelper(h.App.Host()).Value().Interface()
 	if host != nil {
-		v, ok := host.(HostOnError)
+		v, ok := host.(HostOnErrorEventHandler)
 		if ok {
 			return v
 		}
