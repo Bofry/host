@@ -23,7 +23,7 @@ const (
 var (
 	typeOfApp              = reflect.TypeOf(App(nil))
 	typeOfHost             = reflect.TypeOf((*Host)(nil)).Elem()
-	stdHostModuleSingleton = &StdHostModule{}
+	nopHostModuleSingleton = NopHostModule{}
 )
 
 type (
@@ -50,6 +50,10 @@ type (
 	Host interface {
 		Start(ctx context.Context)
 		Stop(ctx context.Context) error
+	}
+
+	HostOnError interface {
+		OnError(err error) (disposed bool)
 	}
 
 	HostModule interface {

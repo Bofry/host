@@ -30,5 +30,6 @@ type (
 	AppStaterConfigurator  = internal.AppStaterConfigurator
 	AppTracingConfigurator = internal.AppTracingConfigurator
 	AppModule              = internal.AppModule
+	HostOnError            = internal.HostOnError
 	Starter                = internal.Starter
 )

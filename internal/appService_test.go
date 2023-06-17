@@ -31,11 +31,15 @@ func (h *MockHost) Start(ctx context.Context) {
 }
 func (h *MockHost) Stop(ctx context.Context) error { return nil }
 
-func Test(t *testing.T) {
+func (h *MyHost) OnError(err error) (disposed bool) {
+	return false
+}
+
+func TestAppModule(t *testing.T) {
 	app := NewAppModule(&MockApp{})
-	rvConfig := app.Field(APP_CONFIG_FIELD)
-	rvServiceProvider := app.Field(APP_SERVICE_PROVIDER_FIELD)
-	rvHost := app.Field(APP_HOST_FIELD)
+	rvConfig := app.Config()
+	rvServiceProvider := app.ServiceProvider()
+	rvHost := app.Host()
 
 	var rvHostInterface reflect.Value
 	if rvHost.Type().ConvertibleTo(typeOfHost) {
@@ -56,5 +60,11 @@ func Test(t *testing.T) {
 	t.Logf("HostInterface: %+v\n", rvHostInterface.IsNil())
 
 	host, _ := rvHostInterface.Interface().(Host)
+
+	hostHelper := &HostHelper{
+		App: app,
+	}
+	hostOnError := hostHelper.ExtractHostOnError()
+	t.Logf("hostOnError: %+v\n", hostOnError)
 	host.Start(context.Background())
 }

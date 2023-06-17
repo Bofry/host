@@ -124,3 +124,7 @@ func (host *Host) Stop(ctx context.Context) error {
 	logger.Println("[MockApp] Host.Shutdown()")
 	return nil
 }
+
+func (host *Host) OnError(err error) (disposed bool) {
+	return false
+}

@@ -43,7 +43,7 @@ func (s *AppService) LoadConfiguration() {
 	s.initConfig()
 
 	if s.configureConfigurationAction != nil {
-		rvConfig := s.appModule.Field(APP_CONFIG_FIELD)
+		rvConfig := s.appModule.Config()
 		service := config.NewConfigurationService(rvConfig.Interface())
 		s.configureConfigurationAction(service)
 	}
@@ -106,9 +106,9 @@ func (s *AppService) Stop(ctx context.Context) error {
 func (s *AppService) registerConstructors(service InjectionService) error {
 	app := s.appModule
 	var (
-		configFieldGetter          = AppModuleField(app.Field(APP_CONFIG_FIELD)).MakeGetter()
-		serviceProviderFieldGetter = AppModuleField(app.Field(APP_SERVICE_PROVIDER_FIELD)).MakeGetter()
-		hostFieldGetter            = AppModuleField(app.Field(APP_HOST_FIELD)).MakeGetter()
+		configFieldGetter          = ReflectHelper(app.Config()).MakeGetter()
+		serviceProviderFieldGetter = ReflectHelper(app.ServiceProvider()).MakeGetter()
+		hostFieldGetter            = ReflectHelper(app.Host()).MakeGetter()
 	)
 
 	service.registerConstructors(
@@ -134,7 +134,7 @@ func (s *AppService) initApp() {
 func (s *AppService) initConfig() {
 	app := s.appModule
 	var (
-		rvConfig = app.Field(APP_CONFIG_FIELD)
+		rvConfig = app.Config()
 	)
 	s.logger.Printf("LOAD Configuration %s", rvConfig.Type())
 
@@ -159,8 +159,8 @@ func (s *AppService) initConfig() {
 func (s *AppService) initHost() {
 	app := s.appModule
 	var (
-		rvConfig = app.Field(APP_CONFIG_FIELD)
-		rvHost   = app.Field(APP_HOST_FIELD)
+		rvConfig = app.Config()
+		rvHost   = app.Host()
 	)
 	s.logger.Printf("LOAD Host %s", rvHost.Type())
 
@@ -189,8 +189,8 @@ func (s *AppService) initHost() {
 func (s *AppService) initServiceProvider() {
 	app := s.appModule
 	var (
-		rvConfig          = app.Field(APP_CONFIG_FIELD)
-		rvServiceProvider = app.Field(APP_SERVICE_PROVIDER_FIELD)
+		rvConfig          = app.Config()
+		rvServiceProvider = app.ServiceProvider()
 	)
 	s.logger.Printf("LOAD ServiceProvider %s", rvServiceProvider.Type())
 

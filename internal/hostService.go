@@ -38,8 +38,8 @@ func (m *HostService) Stop(ctx context.Context) error {
 func (m *HostService) registerHost(app *AppModule) Host {
 	if m.host == nil {
 		var (
-			rvHost          = app.Field(APP_HOST_FIELD)
-			rvHostInterface = AppModuleField(rvHost).As(m.hostModule.DescribeHostType()).Value()
+			rvHost          = app.Host()
+			rvHostInterface = ReflectHelper(rvHost).As(m.hostModule.DescribeHostType()).Value()
 			host            Host
 		)
 		// check if rvHost can convert to Host interface

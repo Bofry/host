@@ -10,5 +10,5 @@ func Startup(app interface{}) *Starter
 //go:linkname RegisterHostModule github.com/Bofry/host/internal.RegisterHostModule
 func RegisterHostModule(starter *Starter, service HostModule)
 
-//go:linkname StdHostServiceInstance github.com/Bofry/host/internal.StdHostServiceInstance
-func StdHostServiceInstance() HostModule
+//go:linkname NopHostServiceInstance github.com/Bofry/host/internal.NopHostServiceInstance
+func NopHostServiceInstance() HostModule

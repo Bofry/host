@@ -42,7 +42,7 @@ func TestStarter(t *testing.T) {
 				Output()
 		})
 
-	runCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	runCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := starter.Start(runCtx); err != nil {
 		t.Error(err)

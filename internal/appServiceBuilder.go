@@ -14,7 +14,7 @@ func NewAppServiceBuilder(logger *log.Logger) *AppServiceBuilder {
 	}
 
 	hostService := &HostService{
-		hostModule: stdHostModuleSingleton,
+		hostModule: nopHostModuleSingleton,
 		logger:     logger,
 	}
 

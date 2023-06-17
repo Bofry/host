@@ -6,6 +6,6 @@ func RegisterHostModule(starter *Starter, host HostModule) {
 	}
 }
 
-func StdHostServiceInstance() HostModule {
-	return stdHostModuleSingleton
+func NopHostServiceInstance() HostModule {
+	return nopHostModuleSingleton
 }
