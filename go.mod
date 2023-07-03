@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Bofry/config v0.2.1-0.20230123080007-f27e105e05e2
-	github.com/Bofry/trace v0.0.0-20230609150550-9f408e99bedf
+	github.com/Bofry/trace v0.2.0-alpha.20230703152613
 	go.opentelemetry.io/otel v1.14.0
 	go.uber.org/fx v1.18.2
 )
