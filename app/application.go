@@ -22,6 +22,7 @@ type Application struct {
 
 	messageHandler MessageHandler
 	eventHandler   EventHandler
+	errorHandler   ErrorHandler
 
 	worker *Worker
 
@@ -123,6 +124,10 @@ func (ap *Application) receiveEvent(event *Event) {
 	}
 
 	ap.worker.dispatchEvent(ctx, event)
+}
+
+func (ap *Application) receiveError(err error) {
+	ap.errorHandler(err)
 }
 
 func (ap *Application) configureMessageCodeResolver(resolver MessageCodeResolver) {

@@ -7,8 +7,9 @@ const (
 )
 
 const (
-	BINARY MessageFormat = 0
-	TEXT   MessageFormat = 1
+	UNKNOWN MessageFormat = 0
+	TEXT    MessageFormat = 1
+	BINARY  MessageFormat = 2
 )
 
 type (
@@ -52,6 +53,7 @@ type (
 
 	MessageHandler func(ctx *Context, message *Message)
 	EventHandler   func(ctx *Context, event *Event) error
+	ErrorHandler   func(err error)
 
 	MessageCodeResolver func(format MessageFormat, payload []byte) string
 

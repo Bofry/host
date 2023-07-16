@@ -120,3 +120,10 @@ func WithEventHandler(handler EventHandler) ApplicationBuildingOption {
 		return nil
 	})
 }
+
+func WithErrorHandler(handler ErrorHandler) ApplicationBuildingOption {
+	return ApplicationBuildingOptionFunc(func(ap *Application) error {
+		ap.errorHandler = handler
+		return nil
+	})
+}

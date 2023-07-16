@@ -11,6 +11,7 @@ type Worker struct {
 
 	receiveMessage func(*Message)
 	receiveEvent   func(*Event)
+	receiveError   func(error)
 
 	messageCodeResolver   MessageCodeResolver
 	invalidMessageHandler MessageHandler
@@ -21,6 +22,7 @@ type Worker struct {
 
 	message chan *Message
 	event   chan *Event
+	error   chan error
 	done    chan struct{}
 
 	wg    sync.WaitGroup
@@ -60,6 +62,7 @@ func (w *Worker) start(ctx context.Context) error {
 	var (
 		message = w.message
 		event   = w.event
+		error   = w.error
 		done    = w.done
 	)
 
@@ -80,6 +83,13 @@ func (w *Worker) start(ctx context.Context) error {
 					defer w.wg.Done()
 
 					w.receiveEvent(v)
+				}
+			case v, ok := <-error:
+				if ok {
+					w.wg.Add(1)
+					defer w.wg.Done()
+
+					w.receiveError(v)
 				}
 			case <-done:
 				w.logger.Println("Stopping")
