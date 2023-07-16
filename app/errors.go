@@ -15,4 +15,8 @@ func (e appError) Error() string {
 	return string(e)
 }
 
+func (e appError) String() string {
+	return e.Error()
+}
+
 type MessageError error

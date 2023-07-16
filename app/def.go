@@ -7,10 +7,10 @@ const (
 )
 
 const (
-	UNKNOWN MessageFormat = 0
-	TEXT    MessageFormat = 1
-	BINARY  MessageFormat = 2
-	CLOSE   MessageFormat = 8
+	UNKNOWN_MESSAGE MessageFormat = 0
+	TEXT_MESSAGE    MessageFormat = 1
+	BINARY_MESSAGE  MessageFormat = 2
+	CLOSE_MESSAGE   MessageFormat = 8
 )
 
 type (
