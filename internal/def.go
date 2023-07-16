@@ -82,5 +82,5 @@ type (
 		Runner() Runner
 	}
 
-	ConfigureConfigurationAction func(service *config.ConfigurationService)
+	ConfigurationLoader func(service *config.ConfigurationService)
 )

@@ -16,7 +16,7 @@ type AppService struct {
 	componentService *ComponentService
 
 	middlewares                  []Middleware
-	configureConfigurationAction ConfigureConfigurationAction
+	configureConfigurationAction ConfigurationLoader
 
 	logger *log.Logger
 

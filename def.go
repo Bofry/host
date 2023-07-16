@@ -21,7 +21,7 @@ type (
 
 // func
 type (
-	ConfigureConfigurationAction = internal.ConfigureConfigurationAction
+	ConfigurationLoader = internal.ConfigurationLoader
 )
 
 // struct

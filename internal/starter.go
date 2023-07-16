@@ -42,7 +42,7 @@ func (s *Starter) Middlewares(middlewares ...Middleware) *Starter {
 	return s
 }
 
-func (s *Starter) ConfigureConfiguration(action ConfigureConfigurationAction) *Starter {
+func (s *Starter) ConfigureConfiguration(action ConfigurationLoader) *Starter {
 	s.appServiceBuilder.ConfigureConfigurationAction(action)
 	return s
 }

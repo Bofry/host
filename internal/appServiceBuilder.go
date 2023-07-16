@@ -25,7 +25,7 @@ func NewAppServiceBuilder(logger *log.Logger) *AppServiceBuilder {
 	}
 }
 
-func (builder *AppServiceBuilder) ConfigureConfigurationAction(action ConfigureConfigurationAction) *AppServiceBuilder {
+func (builder *AppServiceBuilder) ConfigureConfigurationAction(action ConfigurationLoader) *AppServiceBuilder {
 	builder.appService.configureConfigurationAction = action
 	return builder
 }
