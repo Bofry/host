@@ -10,6 +10,7 @@ const (
 	UNKNOWN MessageFormat = 0
 	TEXT    MessageFormat = 1
 	BINARY  MessageFormat = 2
+	CLOSE   MessageFormat = 8
 )
 
 type (
@@ -22,8 +23,8 @@ type (
 	}
 
 	MessageSource interface {
-		Receive(chan *Message, chan error)
-		Close() error
+		Start(chan *Message, chan error)
+		Stop() error
 
 		MessageSender
 	}
@@ -33,8 +34,8 @@ type (
 	}
 
 	EventSource interface {
-		Notify(chan *Event, chan error)
-		Close() error
+		Start(chan *Event, chan error)
+		Stop() error
 
 		EventForwarder
 	}

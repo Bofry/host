@@ -7,10 +7,10 @@ var (
 
 type MultiEventSource map[string]EventSource
 
-// Close implements EventBroker.
-func (hub MultiEventSource) Close() error {
+// Stop implements EventBroker.
+func (hub MultiEventSource) Stop() error {
 	for _, s := range hub {
-		_ = s.Close()
+		_ = s.Stop()
 	}
 	return nil
 }
@@ -30,9 +30,9 @@ func (hub MultiEventSource) Forward(channel string, payload []byte) error {
 	return Nop
 }
 
-// Next implements EventBroker.
-func (hub MultiEventSource) Notify(observer chan *Event, err chan error) {
+// Start implements EventBroker.
+func (hub MultiEventSource) Start(observer chan *Event, err chan error) {
 	for _, s := range hub {
-		s.Notify(observer, err)
+		s.Start(observer, err)
 	}
 }

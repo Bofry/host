@@ -62,8 +62,8 @@ func (ap *Application) Start(ctx context.Context) error {
 	}()
 	ap.running = true
 
-	ap.messageSource.Receive(ap.worker.messageChan, ap.worker.errChan)
-	ap.eventSource.Notify(ap.worker.eventChan, ap.worker.errChan)
+	ap.messageSource.Start(ap.worker.messageChan, ap.worker.errChan)
+	ap.eventSource.Start(ap.worker.eventChan, ap.worker.errChan)
 	return ap.worker.start(ctx)
 }
 
@@ -82,8 +82,8 @@ func (ap *Application) Stop(ctx context.Context) error {
 		ap.mutex.Unlock()
 	}()
 
-	ap.messageSource.Close()
-	ap.eventSource.Close()
+	ap.messageSource.Stop()
+	ap.eventSource.Stop()
 
 	return ap.worker.stop(ctx)
 }

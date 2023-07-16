@@ -7,8 +7,8 @@ var (
 
 type NoopEventSource struct{}
 
-// Close implements EventSource.
-func (NoopEventSource) Close() error {
+// Stop implements EventSource.
+func (NoopEventSource) Stop() error {
 	return nil
 }
 
@@ -17,5 +17,5 @@ func (NoopEventSource) Forward(channel string, payload []byte) error {
 	return nil
 }
 
-// Notify implements EventSource.
-func (NoopEventSource) Notify(chan *Event, chan error) {}
+// Start implements EventSource.
+func (NoopEventSource) Start(chan *Event, chan error) {}
