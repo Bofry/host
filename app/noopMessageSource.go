@@ -7,10 +7,13 @@ var (
 
 type NoopMessageSrouce struct{}
 
-// Stop implements MessageSource.
-func (NoopMessageSrouce) Stop() error {
+// Close implements MessageSource.
+func (NoopMessageSrouce) Close() error {
 	return nil
 }
+
+// Stop implements MessageSource.
+func (NoopMessageSrouce) Stop() {}
 
 // Start implements MessageSource.
 func (NoopMessageSrouce) Start(chan *Message, chan error) {}

@@ -24,7 +24,8 @@ type (
 
 	MessageSource interface {
 		Start(chan *Message, chan error)
-		Stop() error
+		Stop()
+		Close() error
 
 		MessageSender
 	}
@@ -35,7 +36,8 @@ type (
 
 	EventSource interface {
 		Start(chan *Event, chan error)
-		Stop() error
+		Stop()
+		Close() error
 
 		EventForwarder
 	}

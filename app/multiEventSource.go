@@ -7,12 +7,19 @@ var (
 
 type MultiEventSource map[string]EventSource
 
-// Stop implements EventBroker.
-func (hub MultiEventSource) Stop() error {
+// Close implements EventBroker.
+func (hub MultiEventSource) Close() error {
 	for _, s := range hub {
-		_ = s.Stop()
+		_ = s.Close()
 	}
 	return nil
+}
+
+// Stop implements EventBroker.
+func (hub MultiEventSource) Stop() {
+	for _, s := range hub {
+		s.Stop()
+	}
 }
 
 // Forward implements EventBroker.
