@@ -22,7 +22,7 @@ type (
 	}
 
 	MessageSource interface {
-		Receive(chan *Message)
+		Receive(chan *Message, chan error)
 		Close() error
 
 		MessageSender
@@ -33,7 +33,7 @@ type (
 	}
 
 	EventSource interface {
-		Notify(chan *Event)
+		Notify(chan *Event, chan error)
 		Close() error
 
 		EventForwarder

@@ -62,8 +62,8 @@ func (ap *Application) Start(ctx context.Context) error {
 	}()
 	ap.running = true
 
-	ap.messageSource.Receive(ap.worker.message)
-	ap.eventSource.Notify(ap.worker.event)
+	ap.messageSource.Receive(ap.worker.messageChan, ap.worker.errChan)
+	ap.eventSource.Notify(ap.worker.eventChan, ap.worker.errChan)
 	return ap.worker.start(ctx)
 }
 

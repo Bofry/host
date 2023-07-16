@@ -18,4 +18,4 @@ func (NoopEventSource) Forward(channel string, payload []byte) error {
 }
 
 // Notify implements EventSource.
-func (NoopEventSource) Notify(chan *Event) {}
+func (NoopEventSource) Notify(chan *Event, chan error) {}

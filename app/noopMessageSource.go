@@ -13,7 +13,7 @@ func (NoopMessageSrouce) Close() error {
 }
 
 // Receive implements MessageSource.
-func (NoopMessageSrouce) Receive(chan *Message) {}
+func (NoopMessageSrouce) Receive(chan *Message, chan error) {}
 
 // Send implements MessageSource.
 func (NoopMessageSrouce) Send(format MessageFormat, payload []byte) error {

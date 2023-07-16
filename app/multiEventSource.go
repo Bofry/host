@@ -31,8 +31,8 @@ func (hub MultiEventSource) Forward(channel string, payload []byte) error {
 }
 
 // Next implements EventBroker.
-func (hub MultiEventSource) Notify(observer chan *Event) {
+func (hub MultiEventSource) Notify(observer chan *Event, err chan error) {
 	for _, s := range hub {
-		s.Notify(observer)
+		s.Notify(observer, err)
 	}
 }

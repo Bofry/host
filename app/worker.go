@@ -20,10 +20,10 @@ type Worker struct {
 	messageRouter MessageRouter
 	eventRouter   EventRouter
 
-	message chan *Message
-	event   chan *Event
-	error   chan error
-	done    chan struct{}
+	messageChan chan *Message
+	eventChan   chan *Event
+	errChan     chan error
+	done        chan struct{}
 
 	wg    sync.WaitGroup
 	mutex sync.Mutex
@@ -53,16 +53,16 @@ func (w *Worker) init() {
 		w.receiveEvent = func(e *Event) {}
 	}
 
-	w.message = make(chan *Message)
-	w.event = make(chan *Event)
+	w.messageChan = make(chan *Message)
+	w.eventChan = make(chan *Event)
 	w.done = make(chan struct{})
 }
 
 func (w *Worker) start(ctx context.Context) error {
 	var (
-		message = w.message
-		event   = w.event
-		error   = w.error
+		message = w.messageChan
+		event   = w.eventChan
+		error   = w.errChan
 		done    = w.done
 	)
 
