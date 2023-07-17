@@ -15,6 +15,7 @@ require (
 	github.com/cstockton/go-conv v0.0.0-20170524002450-66a2b2ba36e1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.14.0 // indirect

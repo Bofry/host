@@ -1,7 +1,8 @@
 package app
 
 const (
-	Nop = appError("Nop")
+	Nop                               = appError("Nop")
+	JoinClosedMessageClientManagerErr = appError("Join() MessageClient with a stopped MessageClientManager")
 )
 
 var (

@@ -1,14 +1,14 @@
 package app
 
 var (
-	_ EventSource    = new(MultiEventSource)
-	_ EventForwarder = new(MultiEventSource)
+	_ EventClient    = new(MultiEventClient)
+	_ EventForwarder = new(MultiEventClient)
 )
 
-type MultiEventSource map[string]EventSource
+type MultiEventClient map[string]EventClient
 
 // Close implements EventBroker.
-func (hub MultiEventSource) Close() error {
+func (hub MultiEventClient) Close() error {
 	for _, s := range hub {
 		_ = s.Close()
 	}
@@ -16,14 +16,14 @@ func (hub MultiEventSource) Close() error {
 }
 
 // Stop implements EventBroker.
-func (hub MultiEventSource) Stop() {
+func (hub MultiEventClient) Stop() {
 	for _, s := range hub {
 		s.Stop()
 	}
 }
 
 // Forward implements EventBroker.
-func (hub MultiEventSource) Forward(channel string, payload []byte) error {
+func (hub MultiEventClient) Forward(channel string, payload []byte) error {
 	if hub != nil {
 		s, ok := hub[channel]
 		if ok {
@@ -38,8 +38,8 @@ func (hub MultiEventSource) Forward(channel string, payload []byte) error {
 }
 
 // Start implements EventBroker.
-func (hub MultiEventSource) Start(observer chan *Event, err chan error) {
+func (hub MultiEventClient) Start(pipe *EventPipe) {
 	for _, s := range hub {
-		s.Start(observer, err)
+		s.Start(pipe)
 	}
 }

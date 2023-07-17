@@ -73,22 +73,12 @@ func WithTextMapPropagator(p propagation.TextMapPropagator) ApplicationBuildingO
 	})
 }
 
-func WithMessageSource(source MessageSource) ApplicationBuildingOption {
+func WithEventClient(source EventClient) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
 		if source == nil {
-			source = NoopMessageSrouce{}
+			source = NoopEventClient{}
 		}
-		ap.messageSource = source
-		return nil
-	})
-}
-
-func WithEventSource(source EventSource) ApplicationBuildingOption {
-	return ApplicationBuildingOptionFunc(func(ap *Application) error {
-		if source == nil {
-			source = NoopEventSource{}
-		}
-		ap.eventSource = source
+		ap.eventClient = source
 		return nil
 	})
 }
@@ -103,13 +93,6 @@ func WithMessageRouter(router MessageRouter) ApplicationBuildingOption {
 func WithEventRouter(router EventRouter) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
 		ap.configureEventRouter(router)
-		return nil
-	})
-}
-
-func WithMessageHandler(handler MessageHandler) ApplicationBuildingOption {
-	return ApplicationBuildingOptionFunc(func(ap *Application) error {
-		ap.messageHandler = handler
 		return nil
 	})
 }

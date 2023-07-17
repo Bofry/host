@@ -17,14 +17,20 @@ type Application struct {
 	tracerProvider    *trace.SeverityTracerProvider
 	textMapPropagator propagation.TextMapPropagator
 
-	messageSource MessageSource
-	eventSource   EventSource
+	sessionStateManager  SessionStateManager
+	messageClientManager *MessageClientManager
+	eventClient          EventClient
 
-	messageHandler MessageHandler
-	eventHandler   EventHandler
-	errorHandler   ErrorHandler
+	messagePipe *MessagePipe
+	eventPipe   *EventPipe
 
-	worker *Worker
+	eventHandler EventHandler
+	errorHandler ErrorHandler
+
+	messageChan chan *MessageSource
+	eventChan   chan *Event
+	errorChan   chan error
+	worker      *Worker
 
 	mutex       sync.Mutex
 	initialized bool
@@ -38,6 +44,10 @@ func (ap *Application) TracerProvider() *trace.SeverityTracerProvider {
 
 func (ap *Application) TextMapPropagator() propagation.TextMapPropagator {
 	return ap.textMapPropagator
+}
+
+func (ap *Application) MessageClientManager() *MessageClientManager {
+	return ap.messageClientManager
 }
 
 func (ap *Application) Start(ctx context.Context) error {
@@ -62,8 +72,8 @@ func (ap *Application) Start(ctx context.Context) error {
 	}()
 	ap.running = true
 
-	ap.messageSource.Start(ap.worker.messageChan, ap.worker.errChan)
-	ap.eventSource.Start(ap.worker.eventChan, ap.worker.errChan)
+	ap.messageClientManager.start()
+	ap.eventClient.Start(ap.eventPipe)
 	return ap.worker.start(ctx)
 }
 
@@ -82,17 +92,42 @@ func (ap *Application) Stop(ctx context.Context) error {
 		ap.mutex.Unlock()
 	}()
 
-	ap.messageSource.Stop()
-	ap.eventSource.Stop()
+	ap.eventClient.Stop()
+	ap.messageClientManager.stop()
 
 	return ap.worker.stop(ctx)
 }
 
 func (ap *Application) alloc() {
+	ap.messageChan = make(chan *MessageSource)
+	ap.eventChan = make(chan *Event)
+	ap.errorChan = make(chan error)
+
 	ap.worker = &Worker{
 		logger:         ap.logger,
-		receiveMessage: ap.receiveMessage,
+		receiveMessage: ap.acceptMessage,
 		receiveEvent:   ap.receiveEvent,
+		messageChan:    ap.messageChan,
+		eventChan:      ap.eventChan,
+		errorChan:      ap.errorChan,
+	}
+	ap.worker.alloc()
+
+	ap.messagePipe = &MessagePipe{
+		messageChan: ap.messageChan,
+		errorChan:   ap.errorChan,
+	}
+
+	ap.eventPipe = &EventPipe{
+		eventChan: ap.eventChan,
+		errorChan: ap.errorChan,
+	}
+
+	ap.messageClientManager = &MessageClientManager{
+		clients:              make(map[MessageClient]string),
+		pipe:                 ap.messagePipe,
+		validateClientID:     ap.validateClientID,
+		onMessageClientClose: ap.triggerMessageClientClose,
 	}
 }
 
@@ -105,20 +140,41 @@ func (ap *Application) init() {
 		ap.initialized = true
 	}()
 
+	if ap.sessionStateManager == nil {
+		ap.sessionStateManager = NewStdSessionStateManager()
+	}
+
 	ap.worker.init()
 }
 
-func (ap *Application) receiveMessage(message *Message) {
+func (ap *Application) acceptMessage(client *MessageSource) {
+	var (
+		sessionID    = ap.messageClientManager.getClientID(client.Client)
+		sessionState = ap.sessionStateManager.Load(sessionID)
+	)
+
+	if len(sessionID) == 0 {
+		panic("assert() SessionID should be existed")
+	}
+
 	ctx := &Context{
+		SessionID:             sessionID,
+		SessionState:          sessionState,
+		messageSender:         client.Client,
+		eventForwarder:        ap.eventClient,
 		logger:                ap.logger,
 		invalidMessageHandler: nil, // be determined by MessageDispatcher
 	}
 
-	ap.worker.dispatchMessage(ctx, message)
+	ap.worker.dispatchMessage(ctx, client.Message)
 }
 
 func (ap *Application) receiveEvent(event *Event) {
 	ctx := &Context{
+		SessionID:           "",
+		SessionState:        nil,
+		messageSender:       nil,
+		eventForwarder:      ap.eventClient,
 		logger:              ap.logger,
 		invalidEventHandler: nil, // be determined by MessageDispatcher
 	}
@@ -148,4 +204,15 @@ func (ap *Application) configureMessageRouter(router MessageRouter) {
 
 func (ap *Application) configureEventRouter(router EventRouter) {
 	ap.worker.eventRouter = router
+}
+
+func (ap *Application) validateClientID(id string) bool {
+	return ap.sessionStateManager.TryCreate(id)
+}
+
+func (ap *Application) triggerMessageClientClose(client MessageClient) {
+	var (
+		id = ap.messageClientManager.getClientID(client)
+	)
+	ap.sessionStateManager.Delete(id)
 }

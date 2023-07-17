@@ -12,6 +12,9 @@ var (
 )
 
 type Context struct {
+	SessionID    string
+	SessionState SessionState
+
 	messageSender  MessageSender
 	eventForwarder EventForwarder
 
@@ -83,10 +86,6 @@ func (ctx *Context) Send(format MessageFormat, payload []byte) {
 		return
 	}
 	ctx.messageSender.Send(format, payload)
-}
-
-func (ctx *Context) MessageSender() MessageSender {
-	return ctx.messageSender
 }
 
 func (ctx *Context) Logger() *log.Logger {

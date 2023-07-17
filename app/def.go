@@ -1,6 +1,8 @@
 package app
 
 const (
+	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
+
 	__LOGGER_PREFIX_FORMAT = "[host/app/%s] "
 
 	InvalidChannel string = "?"
@@ -18,14 +20,31 @@ type (
 )
 
 type (
+	SessionStateManager interface {
+		Load(id string) SessionState
+		Update(id string, state SessionState)
+		Delete(id string)
+		TryCreate(id string) bool
+	}
+
+	SessionState interface {
+		CanVisit() bool
+		Visit(func(k, v interface{}))
+		Value(k interface{}) interface{}
+		SetValue(k, v interface{})
+		Lock()
+		Unlock()
+	}
+
 	MessageSender interface {
 		Send(format MessageFormat, payload []byte) error
 	}
 
-	MessageSource interface {
-		Start(chan *Message, chan error)
+	MessageClient interface {
+		Start(*MessagePipe)
 		Stop()
 		Close() error
+		RegisterCloseHandler(func(MessageClient))
 
 		MessageSender
 	}
@@ -34,8 +53,8 @@ type (
 		Forward(channel string, payload []byte) error
 	}
 
-	EventSource interface {
-		Start(chan *Event, chan error)
+	EventClient interface {
+		Start(*EventPipe)
 		Stop()
 		Close() error
 
@@ -57,6 +76,8 @@ type (
 	MessageHandler func(ctx *Context, message *Message)
 	EventHandler   func(ctx *Context, event *Event) error
 	ErrorHandler   func(err error)
+
+	ClientIDValidator func(string) bool
 
 	MessageCodeResolver func(format MessageFormat, payload []byte) string
 

@@ -9,7 +9,7 @@ import (
 type Worker struct {
 	logger *log.Logger
 
-	receiveMessage func(*Message)
+	receiveMessage func(*MessageSource)
 	receiveEvent   func(*Event)
 	receiveError   func(error)
 
@@ -20,15 +20,19 @@ type Worker struct {
 	messageRouter MessageRouter
 	eventRouter   EventRouter
 
-	messageChan chan *Message
+	messageChan chan *MessageSource
 	eventChan   chan *Event
-	errChan     chan error
+	errorChan   chan error
 	done        chan struct{}
 
 	wg    sync.WaitGroup
 	mutex sync.Mutex
 
 	initialized bool
+}
+
+func (w *Worker) alloc() {
+	w.done = make(chan struct{})
 }
 
 func (w *Worker) init() {
@@ -47,22 +51,18 @@ func (w *Worker) init() {
 	}()
 
 	if w.receiveMessage == nil {
-		w.receiveMessage = func(m *Message) {}
+		w.receiveMessage = func(m *MessageSource) {}
 	}
 	if w.receiveEvent == nil {
 		w.receiveEvent = func(e *Event) {}
 	}
-
-	w.messageChan = make(chan *Message)
-	w.eventChan = make(chan *Event)
-	w.done = make(chan struct{})
 }
 
 func (w *Worker) start(ctx context.Context) error {
 	var (
 		message = w.messageChan
 		event   = w.eventChan
-		error   = w.errChan
+		error   = w.errorChan
 		done    = w.done
 	)
 
@@ -73,7 +73,9 @@ func (w *Worker) start(ctx context.Context) error {
 			case v, ok := <-message:
 				if ok {
 					w.wg.Add(1)
-					defer w.wg.Done()
+					defer func() {
+						w.wg.Done()
+					}()
 
 					w.receiveMessage(v)
 				}
@@ -112,12 +114,16 @@ func (w *Worker) dispatchMessage(ctx *Context, message *Message) {
 		router = w.messageRouter
 	)
 
-	code := w.messageCodeResolver(message.Format, message.Body)
+	ctx.invalidMessageHandler = w.invalidMessageHandler
 
-	handler := router.Get(code)
-	if handler != nil {
-		handler(ctx, message)
-		return
+	if w.messageCodeResolver != nil {
+		code := w.messageCodeResolver(message.Format, message.Body)
+
+		handler := router.Get(code)
+		if handler != nil {
+			handler(ctx, message)
+			return
+		}
 	}
 	ctx.InvalidMessage(message)
 }
