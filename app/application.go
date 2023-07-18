@@ -184,6 +184,10 @@ func (ap *Application) receiveEvent(event *Event) {
 }
 
 func (ap *Application) receiveError(err error) {
+	if ap.errorHandler == nil {
+		ap.logger.Println(err)
+		return
+	}
 	ap.errorHandler(err)
 }
 
