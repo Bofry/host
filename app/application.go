@@ -107,6 +107,7 @@ func (ap *Application) alloc() {
 		logger:         ap.logger,
 		receiveMessage: ap.acceptMessage,
 		receiveEvent:   ap.receiveEvent,
+		receiveError:   ap.receiveError,
 		messageChan:    ap.messageChan,
 		eventChan:      ap.eventChan,
 		errorChan:      ap.errorChan,
