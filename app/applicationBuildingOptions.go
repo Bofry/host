@@ -97,9 +97,16 @@ func WithEventRouter(router EventRouter) ApplicationBuildingOption {
 	})
 }
 
-func WithEventHandler(handler EventHandler) ApplicationBuildingOption {
+func WithDefaultMessageHandler(handler MessageHandler) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
-		ap.eventHandler = handler
+		ap.configureDefaultMessageHandler(handler)
+		return nil
+	})
+}
+
+func WithDefaultEventHandler(handler EventHandler) ApplicationBuildingOption {
+	return ApplicationBuildingOptionFunc(func(ap *Application) error {
+		ap.configureDefaultEventHandler(handler)
 		return nil
 	})
 }

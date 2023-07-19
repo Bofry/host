@@ -16,6 +16,8 @@ type Worker struct {
 	messageCodeResolver   MessageCodeResolver
 	invalidMessageHandler MessageHandler
 	invalidEventHandler   EventHandler
+	defaultMessageHandler MessageHandler
+	defaultEventHandler   EventHandler
 
 	messageRouter MessageRouter
 	eventRouter   EventRouter
@@ -125,6 +127,10 @@ func (w *Worker) dispatchMessage(ctx *Context, message *Message) {
 			return
 		}
 	}
+	if w.defaultMessageHandler != nil {
+		w.defaultMessageHandler(ctx, message)
+		return
+	}
 	ctx.InvalidMessage(message)
 }
 
@@ -136,6 +142,10 @@ func (w *Worker) dispatchEvent(ctx *Context, event *Event) {
 	handler := router.Get(event.Channel)
 	if handler != nil {
 		handler(ctx, event)
+		return
+	}
+	if w.defaultEventHandler != nil {
+		w.defaultEventHandler(ctx, event)
 		return
 	}
 	ctx.InvalidEvent(event)

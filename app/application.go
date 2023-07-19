@@ -24,7 +24,8 @@ type Application struct {
 	messagePipe *MessagePipe
 	eventPipe   *EventPipe
 
-	eventHandler EventHandler
+	// messageHandler MessageHandler
+	// eventHandler   EventHandler
 	errorHandler ErrorHandler
 
 	messageChan chan *MessageSource
@@ -201,6 +202,14 @@ func (ap *Application) configureInvalidMessageHandler(handler MessageHandler) {
 
 func (ap *Application) configureInvalidEventHandler(handler EventHandler) {
 	ap.worker.invalidEventHandler = handler
+}
+
+func (ap *Application) configureDefaultMessageHandler(handler MessageHandler) {
+	ap.worker.defaultMessageHandler = handler
+}
+
+func (ap *Application) configureDefaultEventHandler(handler EventHandler) {
+	ap.worker.defaultEventHandler = handler
 }
 
 func (ap *Application) configureMessageRouter(router MessageRouter) {
