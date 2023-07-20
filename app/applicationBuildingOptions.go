@@ -15,6 +15,13 @@ func (f ApplicationBuildingOptionFunc) apply(ap *Application) error {
 	return f(ap)
 }
 
+func WithSessionStateManager(manager SessionStateManager) ApplicationBuildingOption {
+	return ApplicationBuildingOptionFunc(func(ap *Application) error {
+		ap.sessionStateManager = manager
+		return nil
+	})
+}
+
 func WithMessageCodeResolver(resolver MessageCodeResolver) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
 		ap.configureMessageCodeResolver(resolver)

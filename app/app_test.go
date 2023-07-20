@@ -10,9 +10,9 @@ import (
 	"github.com/Bofry/host/app"
 )
 
-func TestXxx(t *testing.T) {
+func TestBuild(t *testing.T) {
 	ap, err := app.Build("demo",
-		app.WithInvalidMessageHandler(func(ctx *app.Context, message *app.Message) {
+		app.WithDefaultMessageHandler(func(ctx *app.Context, message *app.Message) {
 			ctx.Send(message.Format, message.Body)
 		}),
 	)
@@ -54,6 +54,46 @@ func TestXxx(t *testing.T) {
 			case b, ok := <-bob.Out:
 				if ok {
 					t.Logf("bob:: %s", string(b))
+				}
+			}
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		ap.Stop(ctx)
+	}
+}
+
+func TestInit(t *testing.T) {
+	ap := app.Init(&MockModule,
+		app.BindServiceProvider(&MockServiceProvider{ID: "service_provider"}),
+		app.BindConfig(&MockConfig{Env: "local"}),
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	ap.Start(ctx)
+
+	client := &MockMessageClient{
+		In:  make(chan []byte),
+		Out: make(chan []byte),
+	}
+	ap.MessageClientManager().Join(client)
+
+	go func() {
+		client.In <- []byte(fmt.Sprintf("foo$%s", "foo_proto"))
+		client.In <- []byte(fmt.Sprintf("bar$%s", "bar_proto"))
+		client.In <- []byte(fmt.Sprintf("nop$%s", "nop_proto"))
+	}()
+
+	go func() {
+		for {
+			select {
+			case b, ok := <-client.Out:
+				if ok {
+					t.Logf("%s", string(b))
 				}
 			}
 		}

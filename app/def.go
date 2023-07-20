@@ -1,11 +1,23 @@
 package app
 
+import "reflect"
+
 const (
 	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
+
+	__MODULE_APP_FIELD = "App"
 
 	__LOGGER_PREFIX_FORMAT = "[host/app/%s] "
 
 	InvalidChannel string = "?"
+
+	TAG_PROTOCOL = "protocol"
+	TAG_CHANNEL  = "channel"
+)
+
+var (
+	typeOfMessageHandler = reflect.TypeOf(MessageHandler(nil))
+	typeOfEventHandler   = reflect.TypeOf(EventHandler(nil))
 )
 
 const (
@@ -81,10 +93,16 @@ type (
 
 	MessageCodeResolver func(format MessageFormat, payload []byte) string
 
-	ModuleOptionCollection []ApplicationBuildingOption
+	Module interface {
+		ModuleOptions() []ApplicationBuildingOption
+	}
 
 	ApplicationBuildingOption interface {
 		apply(*Application) error
+	}
+
+	ModuleBindingOption interface {
+		apply(reflect.Value) error
 	}
 )
 
