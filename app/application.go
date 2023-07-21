@@ -192,7 +192,7 @@ func (ap *Application) receiveError(err error) {
 	ap.errorHandler(err)
 }
 
-func (ap *Application) configureMessageCodeResolver(resolver MessageCodeResolver) {
+func (ap *Application) configureMessageCodeResolver(resolver ProtocolResolver) {
 	ap.worker.messageCodeResolver = resolver
 }
 

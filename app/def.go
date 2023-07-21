@@ -5,7 +5,10 @@ import "reflect"
 const (
 	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
 
-	__MODULE_APP_FIELD = "App"
+	__MODULE_APP_FIELD                  = "App"
+	__APP_DEFAULT_MESSAGE_HANDLER_FIELD = "DefaultMessageHandler"
+	__APP_DEFAULT_EVENT_HANDLER_FIELD   = "DefaultEventHandler"
+	__APP_EVENT_CLIENT_FIELD            = "EventClient"
 
 	__LOGGER_PREFIX_FORMAT = "[host/app/%s] "
 
@@ -18,6 +21,7 @@ const (
 var (
 	typeOfMessageHandler = reflect.TypeOf(MessageHandler(nil))
 	typeOfEventHandler   = reflect.TypeOf(EventHandler(nil))
+	typeOfEventClient    = reflect.TypeOf((*EventClient)(nil)).Elem()
 )
 
 const (
@@ -91,7 +95,7 @@ type (
 
 	ClientIDValidator func(string) bool
 
-	MessageCodeResolver func(format MessageFormat, payload []byte) string
+	ProtocolResolver func(format MessageFormat, payload []byte) string
 
 	Module interface {
 		ModuleOptions() []ApplicationBuildingOption

@@ -13,7 +13,7 @@ type Worker struct {
 	receiveEvent   func(*Event)
 	receiveError   func(error)
 
-	messageCodeResolver   MessageCodeResolver
+	messageCodeResolver   ProtocolResolver
 	invalidMessageHandler MessageHandler
 	invalidEventHandler   EventHandler
 	defaultMessageHandler MessageHandler

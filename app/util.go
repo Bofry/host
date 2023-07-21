@@ -58,3 +58,12 @@ func asEventHandler(rv reflect.Value) EventHandler {
 	}
 	return nil
 }
+
+func asEventClient(rv reflect.Value) EventClient {
+	if rv.IsValid() {
+		if v, ok := rv.Convert(typeOfEventClient).Interface().(EventClient); ok {
+			return v
+		}
+	}
+	return nil
+}
