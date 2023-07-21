@@ -40,9 +40,7 @@ type MockApp struct {
 	ServiceProvider *MockServiceProvider
 	Config          *MockConfig
 
-	DefaultMessageHandler app.MessageHandler
-	DefaultEventHandler   app.EventHandler
-	EventClient           app.EventClient
+	EventClient app.EventClient
 
 	Env string
 }
@@ -50,13 +48,6 @@ type MockApp struct {
 func (ap *MockApp) Init() {
 	ap.Env = ap.Config.Env
 
-	ap.DefaultMessageHandler = func(ctx *app.Context, message *app.Message) {
-		prefix := fmt.Sprintf("[default:%s]", ap.Env)
-		ctx.Send(message.Format, append([]byte(prefix), message.Body...))
-	}
-	ap.DefaultEventHandler = func(ctx *app.Context, event *app.Event) error {
-		return nil
-	}
 	ap.EventClient = app.MultiEventClient{
 		"foo_topic":        app.NoopEventClient{},
 		"bar_topic":        app.NoopEventClient{},
@@ -78,3 +69,12 @@ func (app *MockApp) Bar(ctx *app.Context, message *app.Message) {
 
 func (app *MockApp) FooEvent(ctx *app.Context, event *app.Event) error { return nil }
 func (app *MockApp) BarEvent(ctx *app.Context, event *app.Event) error { return nil }
+
+func (app *MockApp) DefaultMessageHandler(ctx *app.Context, message *app.Message) {
+	prefix := fmt.Sprintf("[default:%s]", app.Env)
+	ctx.Send(message.Format, append([]byte(prefix), message.Body...))
+}
+
+func (app *MockApp) DefaultEventHandler(ctx *app.Context, event *app.Event) error {
+	return nil
+}

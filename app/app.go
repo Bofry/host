@@ -59,33 +59,15 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 			fn.Call([]reflect.Value(nil))
 		}
 
-		// binding DefaultMessageHandler, DefaultEventHandler
+		// binding by fileds
 		{
 			rvApp := indirectValue(rvApp)
+
+			// binding EventClient
 			for i := 0; i < rvApp.Type().NumField(); i++ {
 				field := rvApp.Type().Field(i)
 
 				switch field.Name {
-				case __APP_DEFAULT_EVENT_HANDLER_FIELD:
-					if field.Type == typeOfEventHandler {
-						rvHandler := rvApp.FieldByName(field.Name)
-						handler := asEventHandler(rvHandler)
-
-						if handler != nil {
-							buildingOpts = append(buildingOpts,
-								WithDefaultEventHandler(handler))
-						}
-					}
-				case __APP_DEFAULT_MESSAGE_HANDLER_FIELD:
-					if field.Type == typeOfMessageHandler {
-						rvHandler := rvApp.FieldByName(field.Name)
-						handler := asMessageHandler(rvHandler)
-
-						if handler != nil {
-							buildingOpts = append(buildingOpts,
-								WithDefaultMessageHandler(handler))
-						}
-					}
 				case __APP_EVENT_CLIENT_FIELD:
 					if field.Type == typeOfEventClient {
 						rvHandler := rvApp.FieldByName(field.Name)
@@ -95,6 +77,33 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 							buildingOpts = append(buildingOpts,
 								WithEventClient(handler))
 						}
+					}
+				}
+			}
+		}
+
+		// binding by methods
+		{
+			// binding DefaultMessageHandler
+			{
+				rvHandler := rvApp.MethodByName(__APP_DEFAULT_EVENT_HANDLER_METHOD)
+				if isEventHandler(rvHandler) {
+					handler := asEventHandler(rvHandler)
+					if handler != nil {
+						buildingOpts = append(buildingOpts,
+							WithDefaultEventHandler(handler))
+					}
+				}
+			}
+
+			// binding DefaultEventHandler
+			{
+				rvHandler := rvApp.MethodByName(__APP_DEFAULT_MESSAGE_HANDLER_METHOD)
+				if isMessageHandler(rvHandler) {
+					handler := asMessageHandler(rvHandler)
+					if handler != nil {
+						buildingOpts = append(buildingOpts,
+							WithDefaultMessageHandler(handler))
 					}
 				}
 			}

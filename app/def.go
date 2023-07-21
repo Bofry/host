@@ -5,10 +5,10 @@ import "reflect"
 const (
 	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
 
-	__MODULE_APP_FIELD                  = "App"
-	__APP_DEFAULT_MESSAGE_HANDLER_FIELD = "DefaultMessageHandler"
-	__APP_DEFAULT_EVENT_HANDLER_FIELD   = "DefaultEventHandler"
-	__APP_EVENT_CLIENT_FIELD            = "EventClient"
+	__MODULE_APP_FIELD                   = "App"
+	__APP_DEFAULT_MESSAGE_HANDLER_METHOD = "DefaultMessageHandler"
+	__APP_DEFAULT_EVENT_HANDLER_METHOD   = "DefaultEventHandler"
+	__APP_EVENT_CLIENT_FIELD             = "EventClient"
 
 	__LOGGER_PREFIX_FORMAT = "[host/app/%s] "
 
