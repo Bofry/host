@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 
@@ -24,24 +25,24 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 		panic("Module must be Struct")
 	}
 
-	// get module name
-	{
-		pkgpath := rvModule.Type().PkgPath()
-		parts := strings.Split(pkgpath, "/")
-
-		if len(parts) > 0 {
-			moduleName = parts[len(parts)-1]
-		}
-	}
-
 	// get App
 	rvApp = rvModule.FieldByName(__MODULE_APP_FIELD)
 	if rvApp.IsValid() {
 		rvApp = reflecting.AssignZero(rvApp)
 
-		// binding
+		// get module name
+		{
+			pkgpath := indirectValue(rvApp).Type().PkgPath()
+			parts := strings.Split(pkgpath, "/")
+
+			if len(parts) > 0 {
+				moduleName = parts[len(parts)-1]
+			}
+		}
+
+		// binding app
 		for _, opt := range opts {
-			err := opt.apply(rvApp)
+			err := opt.apply(rvApp, APP)
 			if err != nil {
 				panic(err)
 			}
@@ -59,28 +60,28 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 			fn.Call([]reflect.Value(nil))
 		}
 
-		// binding by fileds
-		{
-			rvApp := indirectValue(rvApp)
+		// // binding by fileds
+		// {
+		// 	rvApp := indirectValue(rvApp)
 
-			// binding EventClient
-			for i := 0; i < rvApp.Type().NumField(); i++ {
-				field := rvApp.Type().Field(i)
+		// 	// binding EventClient
+		// 	for i := 0; i < rvApp.Type().NumField(); i++ {
+		// 		field := rvApp.Type().Field(i)
 
-				switch field.Name {
-				case __APP_EVENT_CLIENT_FIELD:
-					if field.Type == typeOfEventClient {
-						rvHandler := rvApp.FieldByName(field.Name)
-						handler := asEventClient(rvHandler)
+		// 		switch field.Name {
+		// 		case __APP_EVENT_CLIENT_FIELD:
+		// 			if field.Type == typeOfEventClient {
+		// 				rvHandler := rvApp.FieldByName(field.Name)
+		// 				handler := asEventClient(rvHandler)
 
-						if handler != nil {
-							buildingOpts = append(buildingOpts,
-								WithEventClient(handler))
-						}
-					}
-				}
-			}
-		}
+		// 				if handler != nil {
+		// 					buildingOpts = append(buildingOpts,
+		// 						WithEventClient(handler))
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		// binding by methods
 		{
@@ -122,6 +123,10 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 				protocol, ok := field.Tag.Lookup(TAG_PROTOCOL)
 				if ok && protocol != "-" {
 					handler := asMessageHandler(rvHandler)
+					_, ok := messageRouter[protocol]
+					if ok {
+						panic(fmt.Errorf("find duplicate protocol '%s' on field '%s'", protocol, field.Name))
+					}
 					messageRouter[protocol] = handler
 				}
 
@@ -132,11 +137,28 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 				}
 				channel, ok := field.Tag.Lookup(TAG_CHANNEL)
 				if ok && channel != "-" {
+					optExpandEnv := field.Tag.Get(TAG_OPT_EXPAND_ENV)
+					if optExpandEnv != OPT_OFF || len(optExpandEnv) == 0 || optExpandEnv == OPT_ON {
+						channel = os.ExpandEnv(channel)
+					}
+
 					handler := asEventHandler(rvHandler)
+					_, ok := eventRouter[channel]
+					if ok {
+						panic(fmt.Errorf("find duplicate channel '%s' on field '%s'", channel, field.Name))
+					}
 					eventRouter[channel] = handler
 				}
 
 			}
+		}
+	}
+
+	// binding module options
+	for _, opt := range opts {
+		err := opt.apply(reflect.ValueOf(&buildingOpts), MODULE_OPTIONS)
+		if err != nil {
+			panic(err)
 		}
 	}
 

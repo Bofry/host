@@ -69,6 +69,11 @@ func TestInit(t *testing.T) {
 	ap := app.Init(&MockModule,
 		app.BindServiceProvider(&MockServiceProvider{ID: "service_provider"}),
 		app.BindConfig(&MockConfig{Env: "local"}),
+		app.BindEventClient(app.MultiEventClient{
+			"foo_topic":        nil,
+			"bar_topic":        nil,
+			app.InvalidChannel: nil,
+		}),
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

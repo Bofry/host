@@ -40,7 +40,7 @@ type MockApp struct {
 	ServiceProvider *MockServiceProvider
 	Config          *MockConfig
 
-	EventClient app.EventClient
+	// EventClient app.EventClient
 
 	Env string
 }
@@ -48,11 +48,11 @@ type MockApp struct {
 func (ap *MockApp) Init() {
 	ap.Env = ap.Config.Env
 
-	ap.EventClient = app.MultiEventClient{
-		"foo_topic":        app.NoopEventClient{},
-		"bar_topic":        app.NoopEventClient{},
-		app.InvalidChannel: app.NoopEventClient{},
-	}
+	// ap.EventClient = app.MultiEventClient{
+	// 	"foo_topic":        app.NoopEventClient{},
+	// 	"bar_topic":        app.NoopEventClient{},
+	// 	app.InvalidChannel: app.NoopEventClient{},
+	// }
 }
 
 func (app *MockApp) Foo(ctx *app.Context, message *app.Message) {

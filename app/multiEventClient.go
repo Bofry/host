@@ -9,29 +9,34 @@ type MultiEventClient map[string]EventClient
 
 // Close implements EventBroker.
 func (hub MultiEventClient) Close() error {
-	for _, s := range hub {
-		_ = s.Close()
+	for _, c := range hub {
+		if c != nil {
+			_ = c.Close()
+		}
 	}
 	return nil
 }
 
 // Stop implements EventBroker.
 func (hub MultiEventClient) Stop() {
-	for _, s := range hub {
-		s.Stop()
+	for _, c := range hub {
+		if c != nil {
+			c.Stop()
+		}
 	}
 }
 
 // Forward implements EventBroker.
 func (hub MultiEventClient) Forward(channel string, payload []byte) error {
 	if hub != nil {
-		s, ok := hub[channel]
-		if ok {
-			return s.Forward(channel, payload)
+		c, _ := hub[channel]
+		if c != nil {
+			return c.Forward(channel, payload)
 		}
 
-		if s, ok := hub[InvalidChannel]; ok {
-			return s.Forward(channel, payload)
+		c, _ = hub[InvalidChannel]
+		if c != nil {
+			return c.Forward(channel, payload)
 		}
 	}
 	return Nop
@@ -39,7 +44,9 @@ func (hub MultiEventClient) Forward(channel string, payload []byte) error {
 
 // Start implements EventBroker.
 func (hub MultiEventClient) Start(pipe *EventPipe) {
-	for _, s := range hub {
-		s.Start(pipe)
+	for _, c := range hub {
+		if c != nil {
+			c.Start(pipe)
+		}
 	}
 }

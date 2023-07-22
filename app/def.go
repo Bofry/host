@@ -14,8 +14,11 @@ const (
 
 	InvalidChannel string = "?"
 
-	TAG_PROTOCOL = "protocol"
-	TAG_CHANNEL  = "channel"
+	TAG_PROTOCOL       = "protocol"
+	TAG_CHANNEL        = "channel"
+	TAG_OPT_EXPAND_ENV = "@ExpandEnv"
+	OPT_ON             = "on"
+	OPT_OFF            = "off"
 )
 
 var (
@@ -31,8 +34,14 @@ const (
 	CLOSE_MESSAGE   MessageFormat = 8
 )
 
+const (
+	APP            TargetValueRole = "APP"
+	MODULE_OPTIONS TargetValueRole = "MODULE_OPTIONS"
+)
+
 type (
-	MessageFormat int
+	MessageFormat   int
+	TargetValueRole string
 )
 
 type (
@@ -106,7 +115,7 @@ type (
 	}
 
 	ModuleBindingOption interface {
-		apply(reflect.Value) error
+		apply(reflect.Value, TargetValueRole) error
 	}
 )
 
