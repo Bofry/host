@@ -24,7 +24,7 @@ func WithSessionStateManager(manager SessionStateManager) ApplicationBuildingOpt
 
 func WithProtocolResolver(resolver ProtocolResolver) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
-		ap.configureMessageCodeResolver(resolver)
+		ap.configureProtocolResolver(resolver)
 		return nil
 	})
 }

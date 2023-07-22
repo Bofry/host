@@ -13,7 +13,7 @@ type Worker struct {
 	receiveEvent   func(*Event)
 	receiveError   func(error)
 
-	messageCodeResolver   ProtocolResolver
+	protocolResolver      ProtocolResolver
 	invalidMessageHandler MessageHandler
 	invalidEventHandler   EventHandler
 	defaultMessageHandler MessageHandler
@@ -118,8 +118,8 @@ func (w *Worker) dispatchMessage(ctx *Context, message *Message) {
 
 	ctx.invalidMessageHandler = w.invalidMessageHandler
 
-	if w.messageCodeResolver != nil {
-		code := w.messageCodeResolver(message.Format, message.Body)
+	if w.protocolResolver != nil {
+		code := w.protocolResolver(message.Format, message.Body)
 
 		handler := router.Get(code)
 		if handler != nil {
