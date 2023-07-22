@@ -31,7 +31,7 @@ type Application struct {
 	messageChan chan *MessageSource
 	eventChan   chan *Event
 	errorChan   chan error
-	worker      *Worker
+	worker      *ApplicationWorker
 
 	mutex       sync.Mutex
 	initialized bool
@@ -104,7 +104,7 @@ func (ap *Application) alloc() {
 	ap.eventChan = make(chan *Event)
 	ap.errorChan = make(chan error)
 
-	ap.worker = &Worker{
+	ap.worker = &ApplicationWorker{
 		logger:         ap.logger,
 		receiveMessage: ap.acceptMessage,
 		receiveEvent:   ap.receiveEvent,

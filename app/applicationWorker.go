@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-type Worker struct {
+type ApplicationWorker struct {
 	logger *log.Logger
 
 	receiveMessage func(*MessageSource)
@@ -33,11 +33,11 @@ type Worker struct {
 	initialized bool
 }
 
-func (w *Worker) alloc() {
+func (w *ApplicationWorker) alloc() {
 	w.done = make(chan struct{})
 }
 
-func (w *Worker) init() {
+func (w *ApplicationWorker) init() {
 	if w.initialized {
 		return
 	}
@@ -60,7 +60,7 @@ func (w *Worker) init() {
 	}
 }
 
-func (w *Worker) start(ctx context.Context) error {
+func (w *ApplicationWorker) start(ctx context.Context) error {
 	var (
 		message = w.messageChan
 		event   = w.eventChan
@@ -105,13 +105,13 @@ func (w *Worker) start(ctx context.Context) error {
 	return nil
 }
 
-func (w *Worker) stop(ctx context.Context) error {
+func (w *ApplicationWorker) stop(ctx context.Context) error {
 	close(w.done)
 	w.wg.Wait()
 	return nil
 }
 
-func (w *Worker) dispatchMessage(ctx *Context, message *Message) {
+func (w *ApplicationWorker) dispatchMessage(ctx *Context, message *Message) {
 	var (
 		router = w.messageRouter
 	)
@@ -134,7 +134,7 @@ func (w *Worker) dispatchMessage(ctx *Context, message *Message) {
 	ctx.InvalidMessage(message)
 }
 
-func (w *Worker) dispatchEvent(ctx *Context, event *Event) {
+func (w *ApplicationWorker) dispatchEvent(ctx *Context, event *Event) {
 	var (
 		router = w.eventRouter
 	)
