@@ -25,6 +25,10 @@ var (
 	typeOfMessageHandler = reflect.TypeOf(MessageHandler(nil))
 	typeOfEventHandler   = reflect.TypeOf(EventHandler(nil))
 	typeOfEventClient    = reflect.TypeOf((*EventClient)(nil)).Elem()
+
+	StandardProtocolMessageFormats = []MessageFormat{
+		TEXT_MESSAGE, BINARY_MESSAGE,
+	}
 )
 
 const (
@@ -40,7 +44,7 @@ const (
 )
 
 type (
-	MessageFormat   int
+	MessageFormat   uint
 	TargetValueRole string
 )
 
@@ -117,6 +121,13 @@ type (
 	ModuleBindingOption interface {
 		apply(reflect.Value, TargetValueRole) error
 	}
+
+	StandardProtocol interface {
+		ConfigureProtocol(registry *StandardProtocolRegistry)
+		ReplyMessage(sender MessageSender)
+	}
+
+	MessageHasher func(Message) uint64
 )
 
 /*

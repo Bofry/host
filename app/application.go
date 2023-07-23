@@ -21,6 +21,8 @@ type Application struct {
 	messageClientManager *MessageClientManager
 	eventClient          EventClient
 
+	standardProtocolRegistry *StandardProtocolRegistry
+
 	messagePipe *MessagePipe
 	eventPipe   *EventPipe
 
@@ -104,6 +106,8 @@ func (ap *Application) alloc() {
 	ap.eventChan = make(chan *Event)
 	ap.errorChan = make(chan error)
 
+	ap.standardProtocolRegistry = NewProtocolMessageRegistry()
+
 	ap.worker = &ApplicationWorker{
 		logger:         ap.logger,
 		receiveMessage: ap.acceptMessage,
@@ -149,9 +153,15 @@ func (ap *Application) init() {
 	ap.worker.init()
 }
 
-func (ap *Application) acceptMessage(client *MessageSource) {
+func (ap *Application) acceptMessage(source *MessageSource) {
+	// StandardProtocol?
+	if ap.replyStandardProtocol(source) {
+		return
+	}
+
+	// custom handler
 	var (
-		sessionID    = ap.messageClientManager.getClientID(client.Client)
+		sessionID    = ap.messageClientManager.getClientID(source.Client)
 		sessionState = ap.sessionStateManager.Load(sessionID)
 	)
 
@@ -162,13 +172,13 @@ func (ap *Application) acceptMessage(client *MessageSource) {
 	ctx := &Context{
 		SessionID:             sessionID,
 		SessionState:          sessionState,
-		messageSender:         client.Client,
+		messageSender:         source.Client,
 		eventForwarder:        ap.eventClient,
 		logger:                ap.logger,
 		invalidMessageHandler: nil, // be determined by MessageDispatcher
 	}
 
-	ap.worker.dispatchMessage(ctx, client.Message)
+	ap.worker.dispatchMessage(ctx, source.Message)
 }
 
 func (ap *Application) receiveEvent(event *Event) {
@@ -190,6 +200,19 @@ func (ap *Application) receiveError(err error) {
 		return
 	}
 	ap.errorHandler(err)
+}
+
+func (ap *Application) replyStandardProtocol(source *MessageSource) bool {
+	if ap.standardProtocolRegistry == nil {
+		return false
+	}
+
+	p := ap.standardProtocolRegistry.Get(*source.Message)
+	if p != nil {
+		p.ReplyMessage(source.Client)
+		return true
+	}
+	return false
 }
 
 func (ap *Application) configureProtocolResolver(resolver ProtocolResolver) {
