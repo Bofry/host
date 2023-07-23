@@ -124,7 +124,7 @@ type (
 
 	StandardProtocol interface {
 		ConfigureProtocol(registry *StandardProtocolRegistry)
-		ReplyMessage(sender MessageSender)
+		ReplyMessage(format MessageFormat, sender MessageSender)
 	}
 
 	MessageHasher func(Message) uint64

@@ -45,6 +45,6 @@ func (MockStandardProtocol) ConfigureProtocol(registry *app.StandardProtocolRegi
 }
 
 // ReplyMessage implements app.StandardMessageHandler.
-func (MockStandardProtocol) ReplyMessage(sender app.MessageSender) {
+func (MockStandardProtocol) ReplyMessage(format app.MessageFormat, sender app.MessageSender) {
 	panic("unimplemented")
 }

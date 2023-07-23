@@ -209,7 +209,7 @@ func (ap *Application) replyStandardProtocol(source *MessageSource) bool {
 
 	p := ap.standardProtocolRegistry.Get(*source.Message)
 	if p != nil {
-		p.ReplyMessage(source.Client)
+		p.ReplyMessage(source.Message.Format, source.Client)
 		return true
 	}
 	return false
