@@ -124,18 +124,3 @@ func WithErrorHandler(handler ErrorHandler) ApplicationBuildingOption {
 		return nil
 	})
 }
-
-func WithStandardProtocol(protocols ...StandardProtocol) ApplicationBuildingOption {
-	return ApplicationBuildingOptionFunc(func(ap *Application) error {
-		var (
-			registry = ap.standardProtocolRegistry
-		)
-
-		for _, p := range protocols {
-			if p != nil {
-				p.ConfigureProtocol(registry)
-			}
-		}
-		return nil
-	})
-}

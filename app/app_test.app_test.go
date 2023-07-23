@@ -20,8 +20,8 @@ var MockModule = struct {
 	Foo app.MessageHandler `protocol:"foo"`
 	Bar app.MessageHandler `protocol:"bar"`
 
-	FooEvent app.EventHandler `channel:"foo_topic"`
-	BarEvent app.EventHandler `channel:"bar_topic"`
+	FooEvent app.EventHandler `channel:"foo_topic"   @ExpandEnv:"off"`
+	BarEvent app.EventHandler `channel:"bar_topic"   @ExpandEnv:"off"`
 
 	App *MockApp
 	app.ModuleOptionCollection

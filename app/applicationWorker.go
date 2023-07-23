@@ -118,13 +118,15 @@ func (w *ApplicationWorker) dispatchMessage(ctx *Context, message *Message) {
 
 	ctx.invalidMessageHandler = w.invalidMessageHandler
 
-	if w.protocolResolver != nil {
-		code := w.protocolResolver(message.Format, message.Body)
+	if message.Format.IsData() {
+		if w.protocolResolver != nil {
+			code := w.protocolResolver(message.Format, message.Body)
 
-		handler := router.Get(code)
-		if handler != nil {
-			handler(ctx, message)
-			return
+			handler := router.Get(code)
+			if handler != nil {
+				handler(ctx, message)
+				return
+			}
 		}
 	}
 	if w.defaultMessageHandler != nil {

@@ -21,8 +21,6 @@ type Application struct {
 	messageClientManager *MessageClientManager
 	eventClient          EventClient
 
-	standardProtocolRegistry *StandardProtocolRegistry
-
 	messagePipe *MessagePipe
 	eventPipe   *EventPipe
 
@@ -106,8 +104,6 @@ func (ap *Application) alloc() {
 	ap.eventChan = make(chan *Event)
 	ap.errorChan = make(chan error)
 
-	ap.standardProtocolRegistry = NewProtocolMessageRegistry()
-
 	ap.worker = &ApplicationWorker{
 		logger:         ap.logger,
 		receiveMessage: ap.acceptMessage,
@@ -154,12 +150,6 @@ func (ap *Application) init() {
 }
 
 func (ap *Application) acceptMessage(source *MessageSource) {
-	// StandardProtocol?
-	if ap.replyStandardProtocol(source) {
-		return
-	}
-
-	// custom handler
 	var (
 		sessionID    = ap.messageClientManager.getClientID(source.Client)
 		sessionState = ap.sessionStateManager.Load(sessionID)
@@ -200,19 +190,6 @@ func (ap *Application) receiveError(err error) {
 		return
 	}
 	ap.errorHandler(err)
-}
-
-func (ap *Application) replyStandardProtocol(source *MessageSource) bool {
-	if ap.standardProtocolRegistry == nil {
-		return false
-	}
-
-	p := ap.standardProtocolRegistry.Get(*source.Message)
-	if p != nil {
-		p.ReplyMessage(source.Message.Format, source.Client)
-		return true
-	}
-	return false
 }
 
 func (ap *Application) configureProtocolResolver(resolver ProtocolResolver) {
