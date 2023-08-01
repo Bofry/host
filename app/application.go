@@ -21,6 +21,8 @@ type Application struct {
 	messageClientManager *MessageClientManager
 	eventClient          EventClient
 
+	protocolEmitter ProtocolEmitter
+
 	messagePipe *MessagePipe
 	eventPipe   *EventPipe
 
@@ -146,6 +148,10 @@ func (ap *Application) init() {
 		ap.sessionStateManager = NewStdSessionStateManager()
 	}
 
+	if ap.protocolEmitter == nil {
+		ap.protocolEmitter = StdProtocolEmitter
+	}
+
 	ap.worker.init()
 }
 
@@ -164,6 +170,7 @@ func (ap *Application) acceptMessage(source *MessageSource) {
 		SessionState:          sessionState,
 		messageSender:         source.Client,
 		eventForwarder:        ap.eventClient,
+		protocolEmitter:       ap.protocolEmitter,
 		logger:                ap.logger,
 		invalidMessageHandler: nil, // be determined by MessageDispatcher
 	}
@@ -177,6 +184,7 @@ func (ap *Application) receiveEvent(event *Event) {
 		SessionState:        nil,
 		messageSender:       nil,
 		eventForwarder:      ap.eventClient,
+		protocolEmitter:     ap.protocolEmitter,
 		logger:              ap.logger,
 		invalidEventHandler: nil, // be determined by MessageDispatcher
 	}
@@ -194,6 +202,10 @@ func (ap *Application) receiveError(err error) {
 
 func (ap *Application) configureProtocolResolver(resolver ProtocolResolver) {
 	ap.worker.protocolResolver = resolver
+}
+
+func (ap *Application) configureProtocolEmitter(emitter ProtocolEmitter) {
+	ap.protocolEmitter = emitter
 }
 
 func (ap *Application) configureInvalidMessageHandler(handler MessageHandler) {

@@ -120,11 +120,15 @@ func (w *ApplicationWorker) dispatchMessage(ctx *Context, message *Message) {
 
 	if message.Format.IsData() {
 		if w.protocolResolver != nil {
-			code := w.protocolResolver(message.Format, message.Body)
+			protocol, rawbytes := w.protocolResolver(message.Format, message.Body)
 
-			handler := router.Get(code)
+			handler := router.Get(protocol)
 			if handler != nil {
-				handler(ctx, message)
+				handler(ctx, &Message{
+					Format:   message.Format,
+					Protocol: protocol,
+					Body:     rawbytes,
+				})
 				return
 			}
 		}

@@ -3,8 +3,9 @@ package app
 import "bytes"
 
 type Message struct {
-	Format MessageFormat
-	Body   []byte
+	Format   MessageFormat
+	Protocol string
+	Body     []byte
 }
 
 func (m *Message) DecodeContent(v MessageContent) error {
@@ -17,5 +18,6 @@ func (m *Message) DecodeContent(v MessageContent) error {
 
 func (m Message) Equals(other Message) bool {
 	return (m.Format == other.Format) &&
+		(m.Protocol == other.Protocol) &&
 		bytes.Equal(m.Body, other.Body)
 }

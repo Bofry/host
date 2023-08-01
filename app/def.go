@@ -111,7 +111,8 @@ type (
 
 	ClientIDValidator func(string) bool
 
-	ProtocolResolver func(format MessageFormat, payload []byte) string
+	ProtocolResolver func(format MessageFormat, payload []byte) (string, []byte)
+	ProtocolEmitter  func(format MessageFormat, protocol string, body []byte) []byte
 
 	Module interface {
 		ModuleOptions() []ApplicationBuildingOption

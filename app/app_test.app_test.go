@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/Bofry/host/app"
@@ -27,11 +28,18 @@ var MockModule = struct {
 	app.ModuleOptionCollection
 }{
 	ModuleOptionCollection: app.ModuleOptions(
-		app.WithProtocolResolver(func(format app.MessageFormat, payload []byte) string {
+		app.WithProtocolResolver(func(format app.MessageFormat, payload []byte) (string, []byte) {
 			if len(payload) > 4 && payload[3] == '$' {
-				return string(payload[:3])
+				return string(payload[:3]), payload[4:]
 			}
-			return ""
+			return "", payload
+		}),
+		app.WithProtocolEmitter(func(format app.MessageFormat, protocol string, body []byte) []byte {
+			return bytes.Join(
+				[][]byte{
+					[]byte(protocol + "$"),
+					body,
+				}, nil)
 		}),
 	),
 }
@@ -56,15 +64,15 @@ func (ap *MockApp) Init() {
 }
 
 func (app *MockApp) Foo(ctx *app.Context, message *app.Message) {
-	data := message.Body[4:]
+	data := message.Body
 	prefix := fmt.Sprintf("[Foo:%s]", app.Env)
-	ctx.Send(message.Format, append([]byte(prefix), data...))
+	ctx.Send(message.Format, message.Protocol, append([]byte(prefix), data...))
 }
 
 func (app *MockApp) Bar(ctx *app.Context, message *app.Message) {
-	data := message.Body[4:]
+	data := message.Body
 	prefix := fmt.Sprintf("[Bar:%s]", app.Env)
-	ctx.Send(message.Format, append([]byte(prefix), data...))
+	ctx.Send(message.Format, message.Protocol, append([]byte(prefix), data...))
 }
 
 func (app *MockApp) FooEvent(ctx *app.Context, event *app.Event) error { return nil }
@@ -72,7 +80,7 @@ func (app *MockApp) BarEvent(ctx *app.Context, event *app.Event) error { return 
 
 func (app *MockApp) DefaultMessageHandler(ctx *app.Context, message *app.Message) {
 	prefix := fmt.Sprintf("[default:%s]", app.Env)
-	ctx.Send(message.Format, append([]byte(prefix), message.Body...))
+	ctx.Send(message.Format, message.Protocol, append([]byte(prefix), message.Body...))
 }
 
 func (app *MockApp) DefaultEventHandler(ctx *app.Context, event *app.Event) error {

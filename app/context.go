@@ -15,8 +15,9 @@ type Context struct {
 	SessionID    string
 	SessionState SessionState
 
-	messageSender  MessageSender
-	eventForwarder EventForwarder
+	messageSender   MessageSender
+	eventForwarder  EventForwarder
+	protocolEmitter ProtocolEmitter
 
 	context context.Context
 	logger  *log.Logger
@@ -81,10 +82,12 @@ func (ctx *Context) Forward(channel string, payload []byte) {
 	ctx.eventForwarder.Forward(channel, payload)
 }
 
-func (ctx *Context) Send(format MessageFormat, payload []byte) {
+func (ctx *Context) Send(format MessageFormat, protocol string, body []byte) {
 	if ctx.messageSender == nil {
 		return
 	}
+
+	payload := ctx.protocolEmitter(format, protocol, body)
 	ctx.messageSender.Send(format, payload)
 }
 

@@ -13,7 +13,7 @@ import (
 func TestBuild(t *testing.T) {
 	ap, err := app.Build("demo",
 		app.WithDefaultMessageHandler(func(ctx *app.Context, message *app.Message) {
-			ctx.Send(message.Format, message.Body)
+			ctx.Send(message.Format, message.Protocol, message.Body)
 		}),
 	)
 	if err != nil {

@@ -29,6 +29,13 @@ func WithProtocolResolver(resolver ProtocolResolver) ApplicationBuildingOption {
 	})
 }
 
+func WithProtocolEmitter(emitter ProtocolEmitter) ApplicationBuildingOption {
+	return ApplicationBuildingOptionFunc(func(ap *Application) error {
+		ap.configureProtocolEmitter(emitter)
+		return nil
+	})
+}
+
 func WithInvalidMessageHandler(handler MessageHandler) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
 		ap.configureInvalidMessageHandler(handler)
