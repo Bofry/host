@@ -14,6 +14,7 @@ var (
 type Context struct {
 	SessionID    string
 	SessionState SessionState
+	GlobalState  SessionState
 
 	messageSender   MessageSender
 	eventForwarder  EventForwarder

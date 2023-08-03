@@ -17,6 +17,7 @@ type Application struct {
 	tracerProvider    *trace.SeverityTracerProvider
 	textMapPropagator propagation.TextMapPropagator
 
+	globalState          *StdSessionState
 	sessionStateManager  SessionStateManager
 	messageClientManager *MessageClientManager
 	eventClient          EventClient
@@ -144,6 +145,10 @@ func (ap *Application) init() {
 		ap.initialized = true
 	}()
 
+	if ap.globalState == nil {
+		ap.globalState = NewStdSessionState()
+	}
+
 	if ap.sessionStateManager == nil {
 		ap.sessionStateManager = NewStdSessionStateManager()
 	}
@@ -168,6 +173,7 @@ func (ap *Application) acceptMessage(source *MessageSource) {
 	ctx := &Context{
 		SessionID:             sessionID,
 		SessionState:          sessionState,
+		GlobalState:           ap.globalState,
 		messageSender:         source.Client,
 		eventForwarder:        ap.eventClient,
 		protocolEmitter:       ap.protocolEmitter,
@@ -182,6 +188,7 @@ func (ap *Application) receiveEvent(event *Event) {
 	ctx := &Context{
 		SessionID:           "",
 		SessionState:        nil,
+		GlobalState:         ap.globalState,
 		messageSender:       nil,
 		eventForwarder:      ap.eventClient,
 		protocolEmitter:     ap.protocolEmitter,
