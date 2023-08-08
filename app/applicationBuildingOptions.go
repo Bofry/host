@@ -50,7 +50,7 @@ func WithInvalidEventHandler(handler EventHandler) ApplicationBuildingOption {
 	})
 }
 
-func WithLoggerOuput(w io.Writer) ApplicationBuildingOption {
+func WithLoggerOutput(w io.Writer) ApplicationBuildingOption {
 	return ApplicationBuildingOptionFunc(func(ap *Application) error {
 		if w == nil {
 			w = io.Discard
