@@ -3,14 +3,14 @@ module github.com/Bofry/host
 go 1.19
 
 require (
-	github.com/Bofry/config v0.2.1-0.20230123080007-f27e105e05e2
+	github.com/Bofry/config v0.2.1
 	github.com/Bofry/trace v0.2.0-alpha.20230703152613
 	go.opentelemetry.io/otel v1.14.0
 	go.uber.org/fx v1.18.2
 )
 
 require (
-	github.com/Bofry/structproto v0.2.0-alpha.20221227043020.0.20230519110520-05192d88fe05
+	github.com/Bofry/structproto v0.2.1
 	github.com/Bofry/types v0.1.0 // indirect
 	github.com/cstockton/go-conv v0.0.0-20170524002450-66a2b2ba36e1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect

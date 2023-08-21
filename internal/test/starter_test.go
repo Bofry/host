@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 
@@ -80,50 +81,31 @@ func TestStarter(t *testing.T) {
 		if app.Config == nil {
 			t.Error("assert 'App.Config':: should not be nil")
 		}
-		conf := app.Config
-		if conf.ListenAddress != ":10094" {
-			t.Errorf("assert 'Config.ListenAddress':: expected '%v', got '%v'", ":10094", conf.ListenAddress)
+		expectedConfig := Config{
+			ListenAddress:  ":10094",
+			EnableCompress: true,
+			RedisHost:      "kubernate-redis:26379",
+			RedisPassword:  "1234",
+			RedisDB:        3,
+			RedisPoolSize:  128,
+			Workspace:      "demo_test",
 		}
-		if conf.EnableCompress != true {
-			t.Errorf("assert 'Config.EnableCompress':: expected '%v', got '%v'", true, conf.EnableCompress)
-		}
-		if conf.RedisHost != "kubernate-redis:26379" {
-			t.Errorf("assert 'Config.RedisHost':: expected '%v', got '%v'", "kubernate-redis:26379", conf.RedisHost)
-		}
-		if conf.RedisPassword != "1234" {
-			t.Errorf("assert 'Config.RedisPassword':: expected '%v', got '%v'", "1234", conf.RedisPassword)
-		}
-		if conf.RedisDB != 3 {
-			t.Errorf("assert 'Config.RedisDB':: expected '%v', got '%v'", 3, conf.RedisDB)
-		}
-		if conf.RedisPoolSize != 128 {
-			t.Errorf("assert 'Config.RedisPoolSize':: expected '%v', got '%v'", 128, conf.RedisPoolSize)
-		}
-		if conf.Workspace != "demo_test" {
-			t.Errorf("assert 'Config.Workspace':: expected '%v', got '%v'", "demo_test", conf.Workspace)
+		if !reflect.DeepEqual(expectedConfig, *app.Config) {
+			t.Errorf("assert 'Config':: expected '%#+v', got '%#+v'", expectedConfig, app.Config)
 		}
 	}
 	// assert app.ServiceProvider
 	{
-		if app.ServiceProvider == nil {
-			t.Error("assert 'App.ServiceProvider':: should not be nil")
+		expectedServiceProvider := ServiceProvider{
+			RedisClient: &MockRedis{
+				Host:     "kubernate-redis:26379",
+				Password: "1234",
+				DB:       3,
+				PoolSize: 128,
+			},
 		}
-		provider := app.ServiceProvider
-		if provider.RedisClient == nil {
-			t.Error("assert 'ServiceProvider.RedisClient':: should not be nil")
-		}
-		redisClient := provider.RedisClient
-		if redisClient.Host != "kubernate-redis:26379" {
-			t.Errorf("assert 'RedisClient.Host':: expected '%v', got '%v'", "kubernate-redis:26379", redisClient.Host)
-		}
-		if redisClient.Password != "1234" {
-			t.Errorf("assert 'RedisClient.Password':: expected '%v', got '%v'", "1234", redisClient.Password)
-		}
-		if redisClient.DB != 3 {
-			t.Errorf("assert 'RedisClient.DB':: expected '%v', got '%v'", 3, redisClient.DB)
-		}
-		if redisClient.PoolSize != 128 {
-			t.Errorf("assert 'RedisClient.PoolSize':: expected '%v', got '%v'", 128, redisClient.PoolSize)
+		if !reflect.DeepEqual(expectedServiceProvider, *app.ServiceProvider) {
+			t.Errorf("assert 'ServiceProvider':: expected '%#+v', got '%#+v'", expectedServiceProvider, app.ServiceProvider)
 		}
 	}
 }
