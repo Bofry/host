@@ -1,6 +1,9 @@
 package app
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 var (
 	_ MessageClientInfoImpl = new(MessageClientInfo)
@@ -9,6 +12,7 @@ var (
 type MessageClientInfo struct {
 	id      string
 	startAt time.Time
+	logger  *log.Logger
 }
 
 func NewMessageClientInfo() *MessageClientInfo {
@@ -18,6 +22,11 @@ func NewMessageClientInfo() *MessageClientInfo {
 // ID implements MessageClientInfoImpl.
 func (info *MessageClientInfo) ID() string {
 	return info.id
+}
+
+// Logger implements MessageClientInfoImpl.
+func (info *MessageClientInfo) Logger() *log.Logger {
+	return info.logger
 }
 
 // StartAt implements MessageClientInfoImpl.
@@ -33,4 +42,9 @@ func (info *MessageClientInfo) setID(v string) {
 // setStartAt implements MessageClientInfoImpl.
 func (info *MessageClientInfo) setStartAt(v time.Time) {
 	info.startAt = v
+}
+
+// Logger implements MessageClientInfoImpl.
+func (info *MessageClientInfo) setLogger(v *log.Logger) {
+	info.logger = v
 }

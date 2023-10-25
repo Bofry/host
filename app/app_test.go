@@ -87,8 +87,9 @@ func TestInit(t *testing.T) {
 		MessageClientInfo: app.NewMessageClientInfo(),
 	}
 	client.RegisterCloseHandler(func(mc app.MessageClient) {
-		t.Logf("ID:: %s", mc.ID())
-		t.Logf("StartAt:: %v", mc.StartAt())
+		mc.Logger().Printf("ID:: %s", mc.ID())
+		mc.Logger().Printf("StartAt:: %v", mc.StartAt())
+		mc.Send(app.TEXT_MESSAGE, []byte("closing...."))
 	})
 	ap.MessageClientManager().Join(client)
 

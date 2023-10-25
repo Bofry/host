@@ -2,12 +2,16 @@ package app
 
 var (
 	_ MessageClient = new(RestrictedMessageClient)
+
+	_ MessageClientInfoImpl = closureMessageClientInfo(nil)
 )
+
+type closureMessageClientInfo MessageClient
 
 type RestrictedMessageClient struct {
 	client MessageClient
 
-	RestrictedMessageClientInfo
+	closureMessageClientInfo
 }
 
 func NewRestrictedMessageClient(client MessageClient) *RestrictedMessageClient {
@@ -16,8 +20,8 @@ func NewRestrictedMessageClient(client MessageClient) *RestrictedMessageClient {
 	}
 
 	return &RestrictedMessageClient{
-		client:                      client,
-		RestrictedMessageClientInfo: RestrictedMessageClientInfo(client),
+		client:                   client,
+		closureMessageClientInfo: closureMessageClientInfo(client),
 	}
 }
 
@@ -29,11 +33,6 @@ func (*RestrictedMessageClient) Close() error {
 // RegisterCloseHandler implements MessageClient.
 func (*RestrictedMessageClient) RegisterCloseHandler(func(MessageClient)) {
 	panic("the operation RegisterCloseHandler() is restricted")
-}
-
-// Send implements MessageClient.
-func (*RestrictedMessageClient) Send(format MessageFormat, payload []byte) error {
-	panic("the operation Send() is restricted")
 }
 
 // Start implements MessageClient.

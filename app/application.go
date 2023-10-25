@@ -133,6 +133,7 @@ func (ap *Application) alloc() {
 		pipe:                 ap.messagePipe,
 		validateClientID:     ap.validateClientID,
 		onMessageClientClose: ap.triggerMessageClientClose,
+		logger:               ap.logger,
 	}
 }
 

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"reflect"
 	"time"
 )
@@ -78,9 +79,11 @@ type (
 	MessageClientInfoImpl interface {
 		ID() string
 		StartAt() time.Time
+		Logger() *log.Logger
 
 		setID(v string)
 		setStartAt(v time.Time)
+		setLogger(v *log.Logger)
 	}
 
 	MessageClient interface {

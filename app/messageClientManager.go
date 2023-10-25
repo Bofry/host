@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"sync/atomic"
 	"time"
 
@@ -20,6 +21,7 @@ type MessageClientManager struct {
 
 	validateClientID     ClientIDValidator
 	onMessageClientClose func(MessageClient)
+	logger               *log.Logger
 
 	statusCode int32
 }
@@ -38,6 +40,7 @@ func (manager *MessageClientManager) Join(client MessageClient) error {
 
 				client.setID(id)
 				client.setStartAt(time.Now())
+				client.setLogger(manager.logger)
 				break
 			}
 		}
