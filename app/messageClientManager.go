@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -34,6 +35,9 @@ func (manager *MessageClientManager) Join(client MessageClient) error {
 			id := manager.generateClientID()
 			if manager.validateClientID(id) {
 				manager.clients[client] = id
+
+				client.setID(id)
+				client.setStartAt(time.Now())
 				break
 			}
 		}

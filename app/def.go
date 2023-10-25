@@ -1,6 +1,9 @@
 package app
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 const (
 	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
@@ -72,6 +75,14 @@ type (
 		Send(format MessageFormat, payload []byte) error
 	}
 
+	MessageClientInfoImpl interface {
+		ID() string
+		StartAt() time.Time
+
+		setID(v string)
+		setStartAt(v time.Time)
+	}
+
 	MessageClient interface {
 		Start(*MessagePipe)
 		Stop()
@@ -79,6 +90,7 @@ type (
 		RegisterCloseHandler(func(MessageClient))
 
 		MessageSender
+		MessageClientInfoImpl
 	}
 
 	EventForwarder interface {

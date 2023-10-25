@@ -14,22 +14,26 @@ type MockMessageClient struct {
 	In  chan []byte
 	Out chan []byte
 
-	onClose func(app.MessageClient)
+	onCloseDelegate []func(app.MessageClient)
 
 	stopped bool
+
+	*app.MessageClientInfo
 }
 
 // Close implements app.MessageClient.
 func (c *MockMessageClient) Close() error {
-	if c.onClose != nil {
-		c.onClose(c)
+	restricted := app.NewRestrictedMessageClient(c)
+
+	for _, onClose := range c.onCloseDelegate {
+		onClose(restricted)
 	}
 	return nil
 }
 
 // RegisterCloseHandler implements app.MessageClient.
 func (c *MockMessageClient) RegisterCloseHandler(listener func(app.MessageClient)) {
-	c.onClose = listener
+	c.onCloseDelegate = append(c.onCloseDelegate, listener)
 }
 
 // Send implements app.MessageClient.

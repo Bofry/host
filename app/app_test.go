@@ -82,9 +82,14 @@ func TestInit(t *testing.T) {
 	ap.Start(ctx)
 
 	client := &MockMessageClient{
-		In:  make(chan []byte),
-		Out: make(chan []byte),
+		In:                make(chan []byte),
+		Out:               make(chan []byte),
+		MessageClientInfo: app.NewMessageClientInfo(),
 	}
+	client.RegisterCloseHandler(func(mc app.MessageClient) {
+		t.Logf("ID:: %s", mc.ID())
+		t.Logf("StartAt:: %v", mc.StartAt())
+	})
 	ap.MessageClientManager().Join(client)
 
 	go func() {
