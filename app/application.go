@@ -65,6 +65,13 @@ func (ap *Application) Start(ctx context.Context) error {
 		return nil
 	}
 
+	defer func() {
+		err := recover()
+		if err != nil {
+			ap.receiveError(err)
+		}
+	}()
+
 	var err error
 	ap.mutex.Lock()
 	defer func() {
@@ -78,7 +85,8 @@ func (ap *Application) Start(ctx context.Context) error {
 
 	ap.messageClientManager.start()
 	ap.eventClient.Start(ap.eventPipe)
-	return ap.worker.start(ctx)
+	err = ap.worker.start(ctx)
+	return err
 }
 
 func (ap *Application) Stop(ctx context.Context) error {
@@ -88,6 +96,13 @@ func (ap *Application) Stop(ctx context.Context) error {
 	if !ap.running {
 		return nil
 	}
+
+	defer func() {
+		err := recover()
+		if err != nil {
+			ap.receiveError(err)
+		}
+	}()
 
 	ap.mutex.Lock()
 	defer func() {
