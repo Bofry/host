@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 )
@@ -64,7 +65,7 @@ func (w *ApplicationWorker) start(ctx context.Context) error {
 	var (
 		message = w.messageChan
 		event   = w.eventChan
-		error   = w.errorChan
+		errChan = w.errorChan
 		done    = w.done
 	)
 
@@ -75,8 +76,17 @@ func (w *ApplicationWorker) start(ctx context.Context) error {
 			case v, ok := <-message:
 				if ok {
 					w.wg.Add(1)
+					defer w.wg.Done()
 					defer func() {
-						w.wg.Done()
+						err := recover()
+						if err != nil {
+							switch verr := err.(type) {
+							case error:
+								w.receiveError(verr)
+							default:
+								w.receiveError(fmt.Errorf("%v", err))
+							}
+						}
 					}()
 
 					w.receiveMessage(v)
@@ -85,10 +95,21 @@ func (w *ApplicationWorker) start(ctx context.Context) error {
 				if ok {
 					w.wg.Add(1)
 					defer w.wg.Done()
+					defer func() {
+						err := recover()
+						if err != nil {
+							switch verr := err.(type) {
+							case error:
+								w.receiveError(verr)
+							default:
+								w.receiveError(fmt.Errorf("%v", err))
+							}
+						}
+					}()
 
 					w.receiveEvent(v)
 				}
-			case v, ok := <-error:
+			case v, ok := <-errChan:
 				if ok {
 					w.wg.Add(1)
 					defer w.wg.Done()

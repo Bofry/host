@@ -48,3 +48,6 @@ func (info *MessageClientInfo) setStartAt(v time.Time) {
 func (info *MessageClientInfo) setLogger(v *log.Logger) {
 	info.logger = v
 }
+
+// __ implements MessageClientInfoImpl.
+func (*MessageClientInfo) __() {}

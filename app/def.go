@@ -81,6 +81,7 @@ type (
 		StartAt() time.Time
 		Logger() *log.Logger
 
+		__()
 		setID(v string)
 		setStartAt(v time.Time)
 		setLogger(v *log.Logger)
