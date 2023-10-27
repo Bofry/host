@@ -21,12 +21,14 @@ func TestBuild(t *testing.T) {
 	}
 
 	alice := &MockMessageClient{
-		In:  make(chan []byte),
-		Out: make(chan []byte),
+		In:                make(chan []byte),
+		Out:               make(chan []byte),
+		MessageClientInfo: app.NewMessageClientInfo(),
 	}
 	bob := &MockMessageClient{
-		In:  make(chan []byte),
-		Out: make(chan []byte),
+		In:                make(chan []byte),
+		Out:               make(chan []byte),
+		MessageClientInfo: app.NewMessageClientInfo(),
 	}
 	ap.MessageClientManager().Join(alice)
 	ap.MessageClientManager().Join(bob)
@@ -96,7 +98,8 @@ func TestInit(t *testing.T) {
 	go func() {
 		client.In <- []byte(fmt.Sprintf("foo$%s", "foo_proto"))
 		client.In <- []byte(fmt.Sprintf("bar$%s", "bar_proto"))
-		client.In <- []byte(fmt.Sprintf("nop$%s", "nop_proto"))
+		client.In <- []byte(fmt.Sprintf("nop$%s", "nop1_proto"))
+		client.In <- []byte(fmt.Sprintf("nop$%s", "nop2_proto"))
 	}()
 
 	go func() {

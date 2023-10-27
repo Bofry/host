@@ -162,6 +162,13 @@ func (ap *Application) init() {
 }
 
 func (ap *Application) acceptMessage(source *MessageSource) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			ap.receiveError(err)
+		}
+	}()
+
 	var (
 		sessionID    = ap.messageClientManager.getClientID(source.Client)
 		sessionState = ap.sessionStateManager.Load(sessionID)
@@ -186,6 +193,13 @@ func (ap *Application) acceptMessage(source *MessageSource) {
 }
 
 func (ap *Application) receiveEvent(event *Event) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			ap.receiveError(err)
+		}
+	}()
+
 	ctx := &Context{
 		SessionID:           "",
 		SessionState:        nil,
@@ -200,12 +214,21 @@ func (ap *Application) receiveEvent(event *Event) {
 	ap.worker.dispatchEvent(ctx, event)
 }
 
-func (ap *Application) receiveError(err error) {
+func (ap *Application) receiveError(err interface{}) {
+	var verr error
+	{
+		if v, ok := err.(error); ok {
+			verr = v
+		} else {
+			verr = fmt.Errorf("%v", err)
+		}
+	}
+
 	if ap.errorHandler == nil {
-		ap.logger.Println(err)
+		ap.logger.Println(verr)
 		return
 	}
-	ap.errorHandler(err)
+	ap.errorHandler(verr)
 }
 
 func (ap *Application) configureProtocolResolver(resolver ProtocolResolver) {

@@ -81,6 +81,7 @@ func (app *MockApp) BarEvent(ctx *app.Context, event *app.Event) error { return 
 func (app *MockApp) DefaultMessageHandler(ctx *app.Context, message *app.Message) {
 	prefix := fmt.Sprintf("[default:%s]", app.Env)
 	ctx.Send(message.Format, message.Protocol, append([]byte(prefix), message.Body...))
+	panic("... error occurred ...")
 }
 
 func (app *MockApp) DefaultEventHandler(ctx *app.Context, event *app.Event) error {
