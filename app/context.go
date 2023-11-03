@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -26,8 +27,9 @@ type Context struct {
 	invalidMessageHandler MessageHandler
 	invalidEventHandler   EventHandler
 
-	values     map[interface{}]interface{}
-	valuesOnce sync.Once
+	closeSendFlag int32
+	values        map[interface{}]interface{}
+	valuesOnce    sync.Once
 }
 
 // Deadline implements context.Context.
@@ -83,13 +85,25 @@ func (ctx *Context) Forward(channel string, payload []byte) {
 	ctx.eventForwarder.Forward(channel, payload)
 }
 
-func (ctx *Context) Send(format MessageFormat, protocol string, body []byte) {
+func (ctx *Context) Send(format MessageFormat, protocol string, body []byte) error {
 	if ctx.messageSender == nil {
-		return
+		return nil
+	}
+	if ctx.IsCloseSend() {
+		return ErrSendMessageToClosedWriter
 	}
 
 	payload := ctx.protocolEmitter(format, protocol, body)
-	ctx.messageSender.Send(format, payload)
+	return ctx.messageSender.Send(format, payload)
+}
+
+func (ctx *Context) IsCloseSend() bool {
+	return atomic.LoadInt32(&ctx.closeSendFlag) == 1
+}
+
+func (ctx *Context) CloseSend() error {
+	atomic.CompareAndSwapInt32(&ctx.closeSendFlag, 0, 1)
+	return nil
 }
 
 func (ctx *Context) Logger() *log.Logger {

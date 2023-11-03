@@ -80,7 +80,15 @@ func (app *MockApp) BarEvent(ctx *app.Context, event *app.Event) error { return 
 
 func (app *MockApp) DefaultMessageHandler(ctx *app.Context, message *app.Message) {
 	prefix := fmt.Sprintf("[default:%s]", app.Env)
-	ctx.Send(message.Format, message.Protocol, append([]byte(prefix), message.Body...))
+	err := ctx.Send(message.Format, message.Protocol, append([]byte(prefix), message.Body...))
+	if err != nil {
+		ctx.Logger().Printf("err on send 1st:: %v", err)
+	}
+	ctx.CloseSend()
+	err = ctx.Send(message.Format, message.Protocol, append([]byte(prefix+"??11"), message.Body...))
+	if err != nil {
+		ctx.Logger().Printf("err on send 2nd:: %v", err)
+	}
 	panic("... error occurred ...")
 }
 

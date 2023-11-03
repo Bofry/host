@@ -28,7 +28,7 @@ type MessageClientManager struct {
 
 func (manager *MessageClientManager) Join(client MessageClient) error {
 	if __STOPPED_MessageClientManager == manager.statusCode {
-		return JoinClosedMessageClientManagerErr
+		return ErrJoinClosedMessageClientManager
 	}
 
 	_, ok := manager.clients[client]
