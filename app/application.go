@@ -118,7 +118,7 @@ func (ap *Application) Stop(ctx context.Context) error {
 }
 
 func (ap *Application) alloc() {
-	ap.messageChan = make(chan *MessageSource)
+	ap.messageChan = make(chan *MessageSource, 1000)
 	ap.eventChan = make(chan *Event)
 	ap.errorChan = make(chan error)
 
