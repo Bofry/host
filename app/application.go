@@ -260,7 +260,7 @@ func (ap *Application) receiveError(err interface{}) {
 		ap.logger.SetOutput(writer)
 
 		defer func() {
-			ap.logger.SetOutput(currentWriter)
+			ap.logger.SetOutput(writer.Writter())
 		}()
 	}
 

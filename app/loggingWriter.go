@@ -41,6 +41,10 @@ func (w *LoggingWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
+func (w *LoggingWriter) Writter() io.Writer {
+	return w.writer
+}
+
 func (w *LoggingWriter) fork(writer io.Writer) *LoggingWriter {
 	if writer == nil {
 		writer = io.Discard
