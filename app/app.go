@@ -11,12 +11,23 @@ import (
 	"github.com/Bofry/structproto/reflecting"
 )
 
+var (
+	_RestrictedApplicationBuildingOptions = sliceToMap[string, bool]([]string{
+		APP_BUILDING_OPT_DEFAULT_EVENT_HANDLER,
+		APP_BUILDING_OPT_DEFAULT_MESSAGE_HANDLER,
+		APP_BUILDING_OPT_INVALID_EVENT_HANDLER,
+		APP_BUILDING_OPT_INVALID_MESSAGE_HANDLER,
+		APP_BUILDING_OPT_ERROR_HANDLER,
+	}, func(key string) bool { return true })
+)
+
 func Init(v Module, opts ...ModuleBindingOption) *Application {
 	var (
+		app           *Application
 		moduleName    string
 		buildingOpts  = v.ModuleOptions()
 		rvModule      = indirectValue(reflect.ValueOf(v))
-		rvApp         reflect.Value
+		rvAppModule   reflect.Value
 		messageRouter = make(MessageRouter)
 		eventRouter   = make(EventRouter)
 	)
@@ -25,14 +36,22 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 		panic("Module must be Struct")
 	}
 
-	// get App
-	rvApp = rvModule.FieldByName(__MODULE_APP_FIELD)
-	if rvApp.IsValid() {
-		rvApp = reflecting.AssignZero(rvApp)
+	// validate restricted ModuleBindingOption
+	for _, opt := range buildingOpts {
+		typename := opt.typeName()
+		if _, ok := _RestrictedApplicationBuildingOptions[typename]; ok {
+			panic(fmt.Sprintf("specified ModuleBindingOption '%s' is restricted", typename))
+		}
+	}
+
+	// get AppModule
+	rvAppModule = rvModule.FieldByName(__MODULE_APP_FIELD)
+	if rvAppModule.IsValid() {
+		rvAppModule = reflecting.AssignZero(rvAppModule)
 
 		// get module name
 		{
-			pkgpath := indirectValue(rvApp).Type().PkgPath()
+			pkgpath := indirectValue(rvAppModule).Type().PkgPath()
 			parts := strings.Split(pkgpath, "/")
 
 			if len(parts) > 0 {
@@ -40,54 +59,70 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 			}
 		}
 
-		// binding app
+		// binding AppModule
 		for _, opt := range opts {
-			err := opt.apply(rvApp, APP)
+			err := opt.apply(rvAppModule, APP)
 			if err != nil {
 				panic(err)
 			}
 		}
 
-		// call Init()
-		fn := rvApp.MethodByName(host.APP_COMPONENT_INIT_METHOD)
+		// allocate App
+		app = allocApplication(moduleName)
+
+		// binding by fields
+		{
+			// re-define rvAppModule
+			var rvAppModule = indirectValue(rvAppModule)
+
+			// binding EventClient
+			for i := 0; i < rvAppModule.Type().NumField(); i++ {
+				field := rvAppModule.Type().Field(i)
+
+				switch field.Name {
+				// case __APP_EVENT_CLIENT_FIELD:
+				// 	if field.Type == typeOfEventClient {
+				// 		rvHandler := rvAppModule.FieldByName(field.Name)
+				// 		handler := asEventClient(rvHandler)
+
+				// 		if handler != nil {
+				// 			buildingOpts = append(buildingOpts,
+				// 				WithEventClient(handler))
+				// 		}
+				// 	}
+				case __APP_APP_BASE_FIELD:
+					if field.Type != typeOfAppBase {
+						panic(fmt.Sprintf("field '%s' should be of type %s", field.Name, typeOfAppBase.String()))
+					}
+
+					var (
+						appBase = &AppBase{application: app}
+					)
+
+					rvAppBase := rvAppModule.FieldByName(field.Name)
+					rvAppBase = reflecting.AssignZero(rvAppBase)
+					rvAppBase.Set(reflect.ValueOf(appBase))
+				}
+			}
+		}
+
+		// call AppModule.Init()
+		fn := rvAppModule.MethodByName(host.APP_COMPONENT_INIT_METHOD)
 		if fn.IsValid() {
 			if fn.Kind() != reflect.Func {
-				panic(fmt.Errorf("fail to Init() request handler. cannot find func %s() within type %s\n", host.APP_COMPONENT_INIT_METHOD, rvApp.Type().String()))
+				panic(fmt.Errorf("fail to Init() request handler. cannot find func %s() within type %s\n", host.APP_COMPONENT_INIT_METHOD, rvAppModule.Type().String()))
 			}
 			if fn.Type().NumIn() != 0 || fn.Type().NumOut() != 0 {
-				panic(fmt.Errorf("fail to Init() request handler. %s.%s() type should be func()\n", rvApp.Type().String(), host.APP_COMPONENT_INIT_METHOD))
+				panic(fmt.Errorf("fail to Init() request handler. %s.%s() type should be func()\n", rvAppModule.Type().String(), host.APP_COMPONENT_INIT_METHOD))
 			}
 			fn.Call([]reflect.Value(nil))
 		}
 
-		// // binding by fileds
-		// {
-		// 	rvApp := indirectValue(rvApp)
-
-		// 	// binding EventClient
-		// 	for i := 0; i < rvApp.Type().NumField(); i++ {
-		// 		field := rvApp.Type().Field(i)
-
-		// 		switch field.Name {
-		// 		case __APP_EVENT_CLIENT_FIELD:
-		// 			if field.Type == typeOfEventClient {
-		// 				rvHandler := rvApp.FieldByName(field.Name)
-		// 				handler := asEventClient(rvHandler)
-
-		// 				if handler != nil {
-		// 					buildingOpts = append(buildingOpts,
-		// 						WithEventClient(handler))
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 		// binding by methods
 		{
-			// binding DefaultMessageHandler
+			// binding InvalidEventHandler
 			{
-				rvHandler := rvApp.MethodByName(__APP_DEFAULT_EVENT_HANDLER_METHOD)
+				rvHandler := rvAppModule.MethodByName(__APP_INVALID_EVENT_HANDLER_METHOD)
 				if isEventHandler(rvHandler) {
 					handler := asEventHandler(rvHandler)
 					if handler != nil {
@@ -97,14 +132,50 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 				}
 			}
 
-			// binding DefaultEventHandler
+			// binding InvalidMessageHandler
 			{
-				rvHandler := rvApp.MethodByName(__APP_DEFAULT_MESSAGE_HANDLER_METHOD)
+				rvHandler := rvAppModule.MethodByName(__APP_INVALID_MESSAGE_HANDLER_METHOD)
 				if isMessageHandler(rvHandler) {
 					handler := asMessageHandler(rvHandler)
 					if handler != nil {
 						buildingOpts = append(buildingOpts,
 							WithDefaultMessageHandler(handler))
+					}
+				}
+			}
+
+			// binding DefaultEventHandler
+			{
+				rvHandler := rvAppModule.MethodByName(__APP_DEFAULT_EVENT_HANDLER_METHOD)
+				if isEventHandler(rvHandler) {
+					handler := asEventHandler(rvHandler)
+					if handler != nil {
+						buildingOpts = append(buildingOpts,
+							WithDefaultEventHandler(handler))
+					}
+				}
+			}
+
+			// binding DefaultMessageHandler
+			{
+				rvHandler := rvAppModule.MethodByName(__APP_DEFAULT_MESSAGE_HANDLER_METHOD)
+				if isMessageHandler(rvHandler) {
+					handler := asMessageHandler(rvHandler)
+					if handler != nil {
+						buildingOpts = append(buildingOpts,
+							WithDefaultMessageHandler(handler))
+					}
+				}
+			}
+
+			// binding ErrorHandler
+			{
+				rvHandler := rvAppModule.MethodByName(__APP_ERROR_HANDLER_METHOD)
+				if isErrorHandler(rvHandler) {
+					handler := asErrorHandler(rvHandler)
+					if handler != nil {
+						buildingOpts = append(buildingOpts,
+							WithErrorHandler(handler))
 					}
 				}
 			}
@@ -116,7 +187,7 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 
 			switch field.Type {
 			case typeOfMessageHandler:
-				rvHandler := rvApp.MethodByName(field.Name)
+				rvHandler := rvAppModule.MethodByName(field.Name)
 				if !isMessageHandler(rvHandler) {
 					panic(fmt.Errorf("binding '%s' failed. cannot convert to MessageHandler", field.Name))
 				}
@@ -129,9 +200,8 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 					}
 					messageRouter[protocol] = handler
 				}
-
 			case typeOfEventHandler:
-				rvHandler := rvApp.MethodByName(field.Name)
+				rvHandler := rvAppModule.MethodByName(field.Name)
 				if !isEventHandler(rvHandler) {
 					panic(fmt.Errorf("binding '%s' failed. cannot convert to EventHandler", field.Name))
 				}
@@ -149,7 +219,6 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 					}
 					eventRouter[channel] = handler
 				}
-
 			}
 		}
 	}
@@ -172,9 +241,16 @@ func Init(v Module, opts ...ModuleBindingOption) *Application {
 		buildingOpts = append(buildingOpts, WithEventRouter(eventRouter))
 	}
 
-	app, err := Build(moduleName, buildingOpts...)
-	if err != nil {
-		panic(err)
+	// initialize Application
+	{
+		var err error
+		for _, builder := range buildingOpts {
+			err = builder.apply(app)
+			if err != nil {
+				panic(err)
+			}
+		}
+		app.init()
 	}
 	return app
 }
@@ -184,6 +260,21 @@ func ModuleOptions(opts ...ApplicationBuildingOption) ModuleOptionCollection {
 }
 
 func Build(appName string, opts ...ApplicationBuildingOption) (*Application, error) {
+	app := allocApplication(appName)
+
+	var err error
+	for _, builder := range opts {
+		err = builder.apply(app)
+		if err != nil {
+			return nil, err
+		}
+	}
+	app.init()
+
+	return app, nil
+}
+
+func allocApplication(appName string) *Application {
 	logger := log.New(log.Default().Writer(), "", log.Default().Flags())
 	logger.SetPrefix(fmt.Sprintf(__LOGGER_PREFIX_FORMAT, appName))
 
@@ -196,15 +287,5 @@ func Build(appName string, opts ...ApplicationBuildingOption) (*Application, err
 	}
 	app.alloc()
 
-	var err error
-	for _, builder := range opts {
-		err = builder.apply(app)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	app.init()
-
-	return app, nil
+	return app
 }

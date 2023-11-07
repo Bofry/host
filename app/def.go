@@ -10,8 +10,12 @@ const (
 	__MAX_GENERATING_CLIENT_ID_ATTEMPTS int = 64
 
 	__MODULE_APP_FIELD                   = "App"
+	__APP_APP_BASE_FIELD                 = "AppBase"
 	__APP_DEFAULT_MESSAGE_HANDLER_METHOD = "DefaultMessageHandler"
 	__APP_DEFAULT_EVENT_HANDLER_METHOD   = "DefaultEventHandler"
+	__APP_INVALID_MESSAGE_HANDLER_METHOD = "InvalidMessageHandler"
+	__APP_INVALID_EVENT_HANDLER_METHOD   = "InvalidEventHandler"
+	__APP_ERROR_HANDLER_METHOD           = "ErrorHandler"
 	__APP_EVENT_CLIENT_FIELD             = "EventClient"
 
 	__LOGGER_PREFIX_FORMAT = "[host/app/%s] "
@@ -28,7 +32,9 @@ const (
 var (
 	typeOfMessageHandler = reflect.TypeOf(MessageHandler(nil))
 	typeOfEventHandler   = reflect.TypeOf(EventHandler(nil))
+	typeOfErrorHandler   = reflect.TypeOf(ErrorHandler(nil))
 	typeOfEventClient    = reflect.TypeOf((*EventClient)(nil)).Elem()
+	typeOfAppBase        = reflect.TypeOf(new(AppBase))
 
 	AllMessageFormats = []MessageFormat{
 		TEXT_MESSAGE, BINARY_MESSAGE,
@@ -136,6 +142,7 @@ type (
 
 	ApplicationBuildingOption interface {
 		apply(*Application) error
+		typeName() string
 	}
 
 	ModuleBindingOption interface {

@@ -45,6 +45,8 @@ var MockModule = struct {
 }
 
 type MockApp struct {
+	*app.AppBase
+
 	ServiceProvider *MockServiceProvider
 	Config          *MockConfig
 
@@ -55,6 +57,8 @@ type MockApp struct {
 
 func (ap *MockApp) Init() {
 	ap.Env = ap.Config.Env
+
+	ap.AppBase.EnableStackTrace(true)
 
 	// ap.EventClient = app.MultiEventClient{
 	// 	"foo_topic":        app.NoopEventClient{},
@@ -95,3 +99,7 @@ func (app *MockApp) DefaultMessageHandler(ctx *app.Context, message *app.Message
 func (app *MockApp) DefaultEventHandler(ctx *app.Context, event *app.Event) error {
 	return nil
 }
+
+// func (app *MockApp) ErrorHandler(err error) {
+// 	app.DumpErrorStackTrace(err)
+// }

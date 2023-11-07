@@ -107,7 +107,8 @@ func TestInit(t *testing.T) {
 			select {
 			case b, ok := <-client.Out:
 				if ok {
-					t.Logf("%s", string(b))
+					fmt.Printf("> %s\n", string(b))
+					// t.Logf("%s", string(b))
 				}
 			}
 		}

@@ -41,6 +41,13 @@ func isEventHandler(rv reflect.Value) bool {
 	return false
 }
 
+func isErrorHandler(rv reflect.Value) bool {
+	if rv.IsValid() {
+		return rv.Type().AssignableTo(typeOfErrorHandler)
+	}
+	return false
+}
+
 func asMessageHandler(rv reflect.Value) MessageHandler {
 	if rv.IsValid() {
 		if v, ok := rv.Convert(typeOfMessageHandler).Interface().(MessageHandler); ok {
@@ -59,6 +66,15 @@ func asEventHandler(rv reflect.Value) EventHandler {
 	return nil
 }
 
+func asErrorHandler(rv reflect.Value) ErrorHandler {
+	if rv.IsValid() {
+		if v, ok := rv.Convert(typeOfErrorHandler).Interface().(ErrorHandler); ok {
+			return v
+		}
+	}
+	return nil
+}
+
 func asEventClient(rv reflect.Value) EventClient {
 	if rv.IsValid() {
 		if v, ok := rv.Convert(typeOfEventClient).Interface().(EventClient); ok {
@@ -66,4 +82,13 @@ func asEventClient(rv reflect.Value) EventClient {
 		}
 	}
 	return nil
+}
+
+func sliceToMap[E comparable, V any](slice []E, setter func(key E) V) map[E]V {
+	var m map[E]V = make(map[E]V, len(slice))
+
+	for _, elem := range slice {
+		m[elem] = setter(elem)
+	}
+	return m
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"sync"
 
@@ -16,6 +17,7 @@ type Application struct {
 	logger            *log.Logger
 	tracerProvider    *trace.SeverityTracerProvider
 	textMapPropagator propagation.TextMapPropagator
+	loggingWriter     *LoggingWriter
 
 	globalState          *StdSessionState
 	sessionStateManager  SessionStateManager
@@ -122,6 +124,8 @@ func (ap *Application) alloc() {
 	ap.eventChan = make(chan *Event)
 	ap.errorChan = make(chan error)
 
+	ap.loggingWriter = NewLoggingWriter(io.Discard)
+
 	ap.worker = &ApplicationWorker{
 		logger:         ap.logger,
 		receiveMessage: ap.acceptMessage,
@@ -171,6 +175,14 @@ func (ap *Application) init() {
 
 	if ap.protocolEmitter == nil {
 		ap.protocolEmitter = StdProtocolEmitter
+	}
+
+	if ap.tracerProvider == nil {
+		ap.tracerProvider = createNoopTracerProvider()
+	}
+
+	if ap.textMapPropagator == nil {
+		ap.textMapPropagator = createNoopTextMapPropagator()
 	}
 
 	ap.worker.init()
@@ -239,11 +251,28 @@ func (ap *Application) receiveError(err interface{}) {
 		}
 	}
 
+	var (
+		currentWriter = ap.logger.Writer()
+	)
+
+	if ap.loggingWriter.EnableStackTrace {
+		writer := ap.loggingWriter.fork(currentWriter)
+		ap.logger.SetOutput(writer)
+
+		defer func() {
+			ap.logger.SetOutput(currentWriter)
+		}()
+	}
+
 	if ap.errorHandler == nil {
 		ap.logger.Println(verr)
 		return
 	}
 	ap.errorHandler(verr)
+}
+
+func (ap *Application) enableErrorStackTrace(enabled bool) {
+	ap.loggingWriter.EnableStackTrace = enabled
 }
 
 func (ap *Application) configureProtocolResolver(resolver ProtocolResolver) {
