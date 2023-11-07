@@ -42,6 +42,9 @@ func (w *LoggingWriter) Write(p []byte) (n int, err error) {
 }
 
 func (w *LoggingWriter) Writter() io.Writer {
+	if loggingWriter, ok := w.writer.(*LoggingWriter); ok {
+		return loggingWriter.Writter()
+	}
 	return w.writer
 }
 
