@@ -56,6 +56,10 @@ func (ap *Application) MessageClientManager() *MessageClientManager {
 	return ap.messageClientManager
 }
 
+func (ap *Application) SessionState(id string) SessionState {
+	return ap.sessionStateManager.Load(id)
+}
+
 func (ap *Application) Start(ctx context.Context) error {
 	if ap.disposed {
 		return fmt.Errorf("the Application has been disposed")
